@@ -1,0 +1,2 @@
+# SmartStandards.AspNetCoreTemplate
+
