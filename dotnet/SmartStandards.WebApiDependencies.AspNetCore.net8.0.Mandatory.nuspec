@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>SmartStandards.WebApiDependencies.AspNetCore.net8.0.Mandatory</id>
+    <version>8.0.1</version>
+    <title>SmartStandards WebApiDependencies (ASP.NET Core - requires EXACT mandatory versions)</title>
+    <authors>SmartStandards</authors>
+    <owners>(public domain)</owners>
+    <copyright>SmartStandards</copyright>
+    <description>
+      A reference package, which is intended to ensure that a set of well-defined versions of Microsoft base packages
+      from the ASP environment are used. This should ensure that update blockades do not arise again and again due to
+      minimal mismatches in the version constraints when multiple libs (from multiple repos) are aggregatged together.
+    </description>
+    <tags> ASP.NET Core Reference Package </tags>
+    <!-- https://spdx.org/licenses/ -->
+    <license type="expression">GPL-3.0-only</license>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <icon>PackageIcon.png</icon>
+    <projectUrl>https://github.com/SmartStandards/AspNetCoreTemplate</projectUrl>
+    <dependencies>
+      <group targetFramework="net8.0">
+
+        <dependency id="System.Runtime" version="[4.3.1]" />
+        <dependency id="System.Text.Encodings.Web" version="[6.0.0]" />
+        <dependency id="System.ServiceModel.Primitives" version="[4.6.0]" />
+
+        <dependency id="Microsoft.AspNetCore" version="[2.2.0]" />
+        <dependency id="Microsoft.AspNetCore.Cors" version="[2.2.0]" />
+        <dependency id="Microsoft.AspNetCore.Http" version="[2.2.2]" />
+        
+        <dependency id="Microsoft.AspNetCore.Mvc" version="[2.2.0]" />
+        <dependency id="Microsoft.AspNetCore.Mvc.Core" version="[2.2.5]" />
+        <dependency id="Microsoft.AspNetCore.Mvc.Cors" version="[2.2.0]" />
+        
+        <dependency id="Microsoft.AspNetCore.Authentication.Negotiate" version="[5.0.17]" />
+        <dependency id="Microsoft.AspNetCore.Authentication.OpenIdConnect" version="[5.0.0]" />
+        
+        <dependency id="Swashbuckle.AspNetCore" version="[6.5.0]" />
+        <dependency id="Swashbuckle.AspNetCore.Annotations" version="[6.5.0]" />
+
+      </group>      
+    </dependencies>
+  </metadata>
+  <files>
+    <!-- https://docs.microsoft.com/en-us/nuget/create-packages/creating-a-package#from-a-convention-based-working-directory -->
+    <file src="PackageIcon.png" target="" />
+  </files>
+</package>
