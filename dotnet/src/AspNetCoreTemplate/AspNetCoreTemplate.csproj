@@ -1,25 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>TemplateWebApi</AssemblyName>
     <RootNamespace>TemplateNamespace</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
-    <Version>8.0.3</Version>
+    <Version>10.0.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>..\..\dist\bin-net8.0\TemplateWebApi.xml</DocumentationFile>
-    <OutputPath>..\..\dist\bin-net8.0\</OutputPath>
+    <DocumentationFile>..\..\dist\bin-net10.0\TemplateWebApi.xml</DocumentationFile>
+    <OutputPath>..\..\dist\bin-net10.0\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <Deterministic>false</Deterministic>
     <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>..\..\dist\bin-net8.0\TemplateWebApi.xml</DocumentationFile>
-    <OutputPath>..\..\dist\bin-net8.0\</OutputPath>
+    <DocumentationFile>..\..\dist\bin-net10.0\TemplateWebApi.xml</DocumentationFile>
+    <OutputPath>..\..\dist\bin-net10.0\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <Deterministic>false</Deterministic>
     <NoWarn>1701;1702;1591</NoWarn>

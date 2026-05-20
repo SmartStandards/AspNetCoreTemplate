@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>SmartStandards.WebApiDependencies.CheapInitializer</AssemblyName>
     <RootNamespace>Microsoft.AspNetCore</RootNamespace>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
@@ -13,26 +13,26 @@
     <Product>SmartStandards.WebApiDependencies</Product>
     <Company>(public domain)</Company>
     <Copyright>SmartStandards</Copyright>
-    <Version>8.0.3</Version>
-    <AssemblyVersion>8.0.3</AssemblyVersion>
+    <Version>10.0.0</Version>
+    <AssemblyVersion>10.0.0</AssemblyVersion>
     <Authors>SmartStandards</Authors>
-    <FileVersion>8.0.3</FileVersion>
+    <FileVersion>10.0.0</FileVersion>
     <PackageTags>AspNetCore Dependencies CheapInitializer</PackageTags>
     <PackageProjectUrl>https://github.com/SmartStandards/AspNetCoreTemplate</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SmartStandards/AspNetCoreTemplate</RepositoryUrl>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>..\..\dist\bin-net8.0\SmartStandards.WebApiDependencies.CheapInitializer.xml</DocumentationFile>
-    <OutputPath>..\..\dist\bin-net8.0\</OutputPath>
+    <DocumentationFile>..\..\dist\bin-net10.0\SmartStandards.WebApiDependencies.CheapInitializer.xml</DocumentationFile>
+    <OutputPath>..\..\dist\bin-net10.0\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <NoWarn>1701;1702;1591</NoWarn>
     <DefineConstants>TRACE;DEBUG;NET8</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>..\..\dist\bin-net8.0\</OutputPath>
-    <DocumentationFile>..\..\dist\bin-net8.0\SmartStandards.WebApiDependencies.CheapInitializer.xml</DocumentationFile>
+    <OutputPath>..\..\dist\bin-net10.0\</OutputPath>
+    <DocumentationFile>..\..\dist\bin-net10.0\SmartStandards.WebApiDependencies.CheapInitializer.xml</DocumentationFile>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <NoWarn>1701;1702;1591</NoWarn>
     <DefineConstants>TRACE;NET8</DefineConstants>
