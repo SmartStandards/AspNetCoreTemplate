@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EFB5135D-039A-4D92-8FDD-9EA5D070F991}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCoreTemplate", "src\AspNetCoreTemplate\AspNetCoreTemplate.csproj", "{C84A4EFA-2879-EB44-CB45-E2618624D7BC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCoreTemplate", "src\AspNetCoreTemplate\AspNetCoreTemplate.csproj", "{39140008-EED8-4108-B107-EB946E01B9CA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiDependencies.CheapInitializer", "src\WebApiDependencies.CheapInitializer\WebApiDependencies.CheapInitializer.csproj", "{B828F7D3-DD7C-4B38-2858-07594C635EFD}"
 EndProject
@@ -25,10 +25,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C84A4EFA-2879-EB44-CB45-E2618624D7BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C84A4EFA-2879-EB44-CB45-E2618624D7BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C84A4EFA-2879-EB44-CB45-E2618624D7BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C84A4EFA-2879-EB44-CB45-E2618624D7BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39140008-EED8-4108-B107-EB946E01B9CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39140008-EED8-4108-B107-EB946E01B9CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39140008-EED8-4108-B107-EB946E01B9CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39140008-EED8-4108-B107-EB946E01B9CA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B828F7D3-DD7C-4B38-2858-07594C635EFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B828F7D3-DD7C-4B38-2858-07594C635EFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B828F7D3-DD7C-4B38-2858-07594C635EFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -38,7 +38,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{C84A4EFA-2879-EB44-CB45-E2618624D7BC} = {EFB5135D-039A-4D92-8FDD-9EA5D070F991}
+		{39140008-EED8-4108-B107-EB946E01B9CA} = {EFB5135D-039A-4D92-8FDD-9EA5D070F991}
 		{B828F7D3-DD7C-4B38-2858-07594C635EFD} = {EFB5135D-039A-4D92-8FDD-9EA5D070F991}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
