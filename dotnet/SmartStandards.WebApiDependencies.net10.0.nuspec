@@ -27,7 +27,7 @@
       
         <!-- ...and extend these here with the state-of-the-art packages from the 'SmartStandards' ecosystem -->
 
-        <dependency id="Newtonsoft.Json" version="13.0.3" />
+        <dependency id="Newtonsoft.Json" version="13.0.4" />
         
         <dependency id="Snowflake44" version="3.7.0" />
         <dependency id="SmartStandards.Essentials" version="0.8.0" />
