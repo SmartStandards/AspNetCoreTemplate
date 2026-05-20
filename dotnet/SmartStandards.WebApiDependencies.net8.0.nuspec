@@ -23,7 +23,7 @@
 
         <!-- regarding any Microsoft packages, we rely on the base reference package... -->
         
-        <dependency id="SmartStandards.WebApiDependencies.AspNetCore.net8.0" version="[8.0.1]" />
+        <dependency id="SmartStandards.WebApiDependencies.AspNetCore.net8.0" version="[8.0.3]" />
       
         <!-- ...and extend these here with the state-of-the-art packages from the SmartStandards universe -->
 
