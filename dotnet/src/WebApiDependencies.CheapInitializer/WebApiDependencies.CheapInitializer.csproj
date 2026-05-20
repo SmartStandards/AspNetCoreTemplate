@@ -45,15 +45,15 @@
 
     <!-- additional packages which are note implicitely provided by 'Microsoft.AspNetCore.App' -->
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="5.0.17" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="10.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.8" />
 
     <!-- intermediate (until we've completely switched to 'Microsoft.AspNetCore.OpenApi' -->
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.7" />
 
     <!-- intermediate (until we've completely switched to 'System.Text.Json' -->
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 
     <!-- 
     
@@ -100,10 +100,10 @@
 
   <!-- IMPORTANT: this package is made for the ASP.NET Core ecosystem ONLY -->
   <Target Name="EnsureAspNetCore" BeforeTargets="Build">
-    <Error 
-      Condition="'$(UsingMicrosoftNETSdkWeb)' != 'true'"
-      Text="This package requires an ASP.NET Core project (Microsoft.NET.Sdk.Web)." 
-    />
+    <Error Condition="!Exists('$(MSBuildProjectFullPath)') OR '$(TargetFrameworkIdentifier)' == '.NETFramework'"
+           Text="This package requires ASP.NET Core (FrameworkReference to 'Microsoft.AspNetCore.App')." />
   </Target>
+
+
 
 </Project>

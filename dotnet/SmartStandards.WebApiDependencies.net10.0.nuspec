@@ -25,7 +25,7 @@
         
         <dependency id="SmartStandards.WebApiDependencies.AspNetCore.net8.0" version="[8.0.3]" />
       
-        <!-- ...and extend these here with the state-of-the-art packages from the SmartStandards universe -->
+        <!-- ...and extend these here with the state-of-the-art packages from the 'SmartStandards' ecosystem -->
 
         <dependency id="Newtonsoft.Json" version="13.0.3" />
         

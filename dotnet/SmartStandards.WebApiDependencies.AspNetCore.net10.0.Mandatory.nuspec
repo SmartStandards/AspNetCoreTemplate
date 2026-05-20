@@ -20,24 +20,18 @@
     <projectUrl>https://github.com/SmartStandards/AspNetCoreTemplate</projectUrl>
     <dependencies>
       <group targetFramework="net10.0">
- 
-        <dependency id="System.Runtime" version="[4.3.1]" />
-        <dependency id="System.Text.Encodings.Web" version="[6.0.0]" />
-        <dependency id="System.ServiceModel.Primitives" version="[4.6.0]" />
 
-        <dependency id="Microsoft.AspNetCore" version="[2.2.0]" />
-        <dependency id="Microsoft.AspNetCore.Cors" version="[2.2.0]" />
-        <dependency id="Microsoft.AspNetCore.Http" version="[2.2.2]" />
-        
-        <dependency id="Microsoft.AspNetCore.Mvc" version="[2.2.0]" />
-        <dependency id="Microsoft.AspNetCore.Mvc.Core" version="[2.2.5]" />
-        <dependency id="Microsoft.AspNetCore.Mvc.Cors" version="[2.2.0]" />
-        
-        <dependency id="Microsoft.AspNetCore.Authentication.Negotiate" version="[5.0.17]" />
-        <dependency id="Microsoft.AspNetCore.Authentication.OpenIdConnect" version="[5.0.0]" />
-        
-        <dependency id="Swashbuckle.AspNetCore" version="[6.5.0]" />
-        <dependency id="Swashbuckle.AspNetCore.Annotations" version="[6.5.0]" />
+        <!-- IMPORTANT: this package is made for the ASP.NET Core ecosystem ONLY, but nuget is -->
+        <!-- not supporting to declare: <FrameworkReference Include="Microsoft.AspNetCore.App"> -->
+
+        <!-- additional packages which are note implicitely provided by 'Microsoft.AspNetCore.App' -->
+        <dependency id="Microsoft.AspNetCore.OpenApi" version="[10.0.8]" />
+        <dependency id="Microsoft.AspNetCore.Authentication.Negotiate" version="[10.0.8]" />
+        <dependency id="Microsoft.AspNetCore.Authentication.OpenIdConnect" version="[10.0.8]" />
+
+        <!-- intermediate (until we've completely switched to 'Microsoft.AspNetCore.OpenApi' -->
+        <dependency id="Swashbuckle.AspNetCore" version="[10.1.7]" />
+        <dependency id="Swashbuckle.AspNetCore.Annotations" version="[10.1.7]" />
 
       </group>      
     </dependencies>
