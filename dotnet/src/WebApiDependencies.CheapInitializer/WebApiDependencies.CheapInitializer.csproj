@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -39,7 +39,26 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="jose-jwt" Version="4.1.0" />
+    
+    <!-- IMPORTANT: this package is made for the ASP.NET Core ecosystem ONLY -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+
+    <!-- additional packages which are note implicitely provided by 'Microsoft.AspNetCore.App' -->
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="5.0.17" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.0" />
+
+    <!-- intermediate (until we've completely switched to 'Microsoft.AspNetCore.OpenApi' -->
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
+
+    <!-- intermediate (until we've completely switched to 'System.Text.Json' -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+
+    <!-- 
+    
+    [implicitely provided by 'Microsoft.AspNetCore.App']
+
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="5.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.0" NoWarn="NU1605" />
@@ -48,23 +67,43 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Cors" Version="2.2.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="SmartAmbience" Version="2.4.8" />
-    <PackageReference Include="SmartAmbience.MvcSupport" Version="2.4.8" />
+    
+    [implicitely provided by .NET CORE]
+    <PackageReference Include="System.Text.Encodings.Web" Version="6.0.0" />
+    <PackageReference Include="System.Runtime" Version="4.3.1" />
+
+    [old WCF-related reference]
+    <PackageReference Include="System.ServiceModel.Primitives" Version="4.6.0" />
+       
+    -->
+
+    <!-- Common packages from the 'SmartStandards' ecosystem -->
+    
+    <PackageReference Include="UJMW.DynamicClient" Version="5.4.0" />
+    <PackageReference Include="UJMW.DynamicController" Version="5.4.0" />
+
     <PackageReference Include="SmartStandards.AuthTokenHandling" Version="5.0.10" />
     <PackageReference Include="SmartStandards.AuthTokenHandling.MvcSupport" Version="5.0.10" />
+
+    <PackageReference Include="SmartAmbience" Version="2.4.8" />
+    <PackageReference Include="SmartAmbience.MvcSupport" Version="2.4.8" />
+
     <PackageReference Include="SmartStandards.Essentials" Version="0.8.0" />
+
     <PackageReference Include="SmartStandards.Logging" Version="3.3.1" />
     <PackageReference Include="SmartStandards.Logging.AspSupport" Version="3.3.1" />
     <PackageReference Include="SmartStandards.Logging.Centralized" Version="3.3.1" />
+
     <PackageReference Include="Snowflake44" Version="3.7.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
-    <PackageReference Include="System.Runtime" Version="4.3.1" />
-    <PackageReference Include="System.ServiceModel.Primitives" Version="4.6.0" />
-    <PackageReference Include="System.Text.Encodings.Web" Version="6.0.0" />
-    <PackageReference Include="UJMW.DynamicClient" Version="5.4.0" />
-    <PackageReference Include="UJMW.DynamicController" Version="5.4.0" />
+  
   </ItemGroup>
+
+  <!-- IMPORTANT: this package is made for the ASP.NET Core ecosystem ONLY -->
+  <Target Name="EnsureAspNetCore" BeforeTargets="Build">
+    <Error 
+      Condition="'$(UsingMicrosoftNETSdkWeb)' != 'true'"
+      Text="This package requires an ASP.NET Core project (Microsoft.NET.Sdk.Web)." 
+    />
+  </Target>
 
 </Project>

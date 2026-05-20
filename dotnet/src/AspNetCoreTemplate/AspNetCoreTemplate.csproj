@@ -4,10 +4,44 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>TemplateWebApi</AssemblyName>
+    <RootNamespace>TemplateNamespace</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <Version>10.0.0</Version>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>..\..\dist\bin-net10.0\TemplateWebApi.xml</DocumentationFile>
+    <OutputPath>..\..\dist\bin-net10.0\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Deterministic>false</Deterministic>
+    <NoWarn>1701;1702;1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>..\..\dist\bin-net10.0\TemplateWebApi.xml</DocumentationFile>
+    <OutputPath>..\..\dist\bin-net10.0\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Deterministic>false</Deterministic>
+    <NoWarn>1701;1702;1591</NoWarn>
+  </PropertyGroup>
+
+  <!-- https://stackoverflow.com/questions/57412190/how-to-include-xml-documentation-from-nuget-package-in-csproj-build-output -->
+  <Target Name="_ResolveCopyLocalNuGetPkgXmls" AfterTargets="ResolveReferences">
+    <ItemGroup>
+      <!-- Copy XML files from all PackageReferences to output dir -->
+      <ReferenceCopyLocalPaths Include="@(ReferenceCopyLocalPaths->'%(RootDir)%(Directory)%(Filename).xml')" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)'!='' and Exists('%(RootDir)%(Directory)%(Filename).xml')" />
+    </ItemGroup>
+  </Target>
+
   <ItemGroup>
+    
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
+
+    <!-- TODO: REMOVE THIS OR CHANGE IT TO A REAL PACKAGE REFERENCE ON 'SmartStandards.WebApiDependencies...' -->
+    <ProjectReference Include="..\WebApiDependencies.CheapInitializer\WebApiDependencies.CheapInitializer.csproj" />
+
   </ItemGroup>
 
   <ItemGroup>
