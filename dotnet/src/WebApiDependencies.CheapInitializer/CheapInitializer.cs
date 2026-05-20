@@ -9,6 +9,8 @@ using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Web.UJMW;
 
+[assembly: AssemblyMetadata("SourceContext", "SmartStandards.WebApiDependencies.CheapInitializer")]
+
 namespace Microsoft.AspNetCore {
 
   public class SmartStandardsCheapInitializer {

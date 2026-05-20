@@ -1,14 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>TemplateWebApi</AssemblyName>
     <RootNamespace>TemplateNamespace</RootNamespace>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);1591</NoWarn>
     <Version>10.0.0</Version>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -34,14 +34,41 @@
       <ReferenceCopyLocalPaths Include="@(ReferenceCopyLocalPaths->'%(RootDir)%(Directory)%(Filename).xml')" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)'!='' and Exists('%(RootDir)%(Directory)%(Filename).xml')" />
     </ItemGroup>
   </Target>
+  <ItemGroup>
+    <Compile Remove="Logs\**" />
+    <Content Remove="Logs\**" />
+    <EmbeddedResource Remove="Logs\**" />
+    <None Remove="Logs\**" />
+  </ItemGroup>
 
   <ItemGroup>
     
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
+    
+    <PackageReference Include="SmartAmbience.MvcSupport" Version="2.4.8" />
+    
+    <PackageReference Include="SmartStandards.Logging" Version="3.3.1" />
 
     <!-- TODO: REMOVE THIS OR CHANGE IT TO A REAL PACKAGE REFERENCE ON 'SmartStandards.WebApiDependencies...' -->
     <ProjectReference Include="..\WebApiDependencies.CheapInitializer\WebApiDependencies.CheapInitializer.csproj" />
 
+    <PackageReference Include="UJMW.DynamicClient" Version="5.4.0" />
+    <PackageReference Include="UJMW.DynamicController" Version="5.4.0" />
+
+    <PackageReference Include="SmartStandards.AuthTokenHandling" Version="5.0.10" />
+    <PackageReference Include="SmartStandards.AuthTokenHandling.MvcSupport" Version="5.0.10" />
+
+    <PackageReference Include="SmartAmbience" Version="2.4.8" />
+    <PackageReference Include="SmartAmbience.MvcSupport" Version="2.4.8" />
+
+    <PackageReference Include="SmartStandards.Essentials" Version="0.8.0" />
+
+    <PackageReference Include="SmartStandards.Logging" Version="3.3.1" />
+    <PackageReference Include="SmartStandards.Logging.AspSupport" Version="3.3.1" />
+    <PackageReference Include="SmartStandards.Logging.Centralized" Version="3.3.1" />
+
+    <PackageReference Include="Snowflake44" Version="3.7.0" />
+    
   </ItemGroup>
 
   <ItemGroup>
