@@ -44,13 +44,6 @@
   <ItemGroup>
     
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
-    
-    <PackageReference Include="SmartAmbience.MvcSupport" Version="2.4.8" />
-    
-    <PackageReference Include="SmartStandards.Logging" Version="3.3.1" />
-
-    <!-- TODO: REMOVE THIS OR CHANGE IT TO A REAL PACKAGE REFERENCE ON 'SmartStandards.WebApiDependencies...' -->
-    <ProjectReference Include="..\WebApiDependencies.CheapInitializer\WebApiDependencies.CheapInitializer.csproj" />
 
     <PackageReference Include="UJMW.DynamicClient" Version="5.4.0" />
     <PackageReference Include="UJMW.DynamicController" Version="5.4.0" />
@@ -63,14 +56,18 @@
 
     <PackageReference Include="SmartStandards.Essentials" Version="0.8.0" />
 
-    <PackageReference Include="SmartStandards.Logging" Version="3.3.1" />
-    <PackageReference Include="SmartStandards.Logging.AspSupport" Version="3.3.1" />
-    <PackageReference Include="SmartStandards.Logging.Centralized" Version="3.3.1" />
+    <PackageReference Include="SmartStandards.Logging" Version="3.4.3" />
+    <PackageReference Include="SmartStandards.Logging.AspSupport" Version="3.4.3" />
 
     <PackageReference Include="Snowflake44" Version="3.7.0" />
     
   </ItemGroup>
-
+  
+  <ItemGroup>
+    <!-- TODO: REMOVE THIS OR CHANGE IT TO A REAL PACKAGE REFERENCE ON 'SmartStandards.WebApiDependencies...' -->
+    <ProjectReference Include="..\WebApiDependencies.CheapInitializer\WebApiDependencies.CheapInitializer.csproj" />
+  </ItemGroup>
+  
   <ItemGroup>
     <Folder Include="Controllers\" />
   </ItemGroup>

@@ -90,9 +90,8 @@
 
     <PackageReference Include="SmartStandards.Essentials" Version="0.8.0" />
 
-    <PackageReference Include="SmartStandards.Logging" Version="3.3.1" />
-    <PackageReference Include="SmartStandards.Logging.AspSupport" Version="3.3.1" />
-    <PackageReference Include="SmartStandards.Logging.Centralized" Version="3.3.1" />
+    <PackageReference Include="SmartStandards.Logging" Version="3.4.3" />
+    <PackageReference Include="SmartStandards.Logging.AspSupport" Version="3.4.3" />
 
     <PackageReference Include="Snowflake44" Version="3.7.0" />
   
@@ -100,8 +99,7 @@
 
   <!-- IMPORTANT: this package is made for the ASP.NET Core ecosystem ONLY -->
   <Target Name="EnsureAspNetCore" BeforeTargets="Build">
-    <Error Condition="!Exists('$(MSBuildProjectFullPath)') OR '$(TargetFrameworkIdentifier)' == '.NETFramework'"
-           Text="This package requires ASP.NET Core (FrameworkReference to 'Microsoft.AspNetCore.App')." />
+    <Error Condition="!Exists('$(MSBuildProjectFullPath)') OR '$(TargetFrameworkIdentifier)' == '.NETFramework'" Text="This package requires ASP.NET Core (FrameworkReference to 'Microsoft.AspNetCore.App')." />
   </Target>
 
 
