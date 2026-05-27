@@ -30,6 +30,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+
+    <!-- any additional MS-near references to get complete access to asp, is provided by this dependency-package: -->
+    <!--<PackageReference Include="SmartStandards.WebApiDependencies.AspNetCore.net10.0" Version="10.0.0" />-->
+    <!-- TODO: COMMENT THIS IN ^^^^^^ - after ProjectReference to 'WebApiDependencies.CheapInitializer' was removed!!! -->
 
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="SmartStandards.Logging" Version="3.4.3" />
@@ -39,14 +51,16 @@
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3967.48" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="8.0.0" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.OpenApi" Version="1.6.23" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.4" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.1.4" />
     
     <PackageReference Include="UJMW.DynamicController" Version="5.4.0" />
     <PackageReference Include="SmartStandards.AuthTokenHandling.MvcSupport" Version="5.1.0" />
     <PackageReference Include="SmartStandards.Logging.AspSupport" Version="3.4.3" />
-    
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- TODO: REMOVE THIS OR CHANGE IT TO A REAL PACKAGE REFERENCE ON 'SmartStandards.WebApiDependencies...' -->
+    <ProjectReference Include="..\WebApiDependencies.CheapInitializer\WebApiDependencies.CheapInitializer.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -80,7 +94,7 @@
     <Folder Include="Controllers\" />
     <Folder Include="[MyProject]\" />
   </ItemGroup>
-  
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutputPath>..\..\dist\bin-net8.0\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>

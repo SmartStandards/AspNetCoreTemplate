@@ -25,7 +25,6 @@ namespace Microsoft.AspNetCore {
 
       UjmwHostConfiguration.UseCombinedDynamicAssembly = true;
 
-
       //services.AddOpenApi();
 
       //string applicationAssemblyName = Assembly.GetCallingAssembly().GetName().Name;
@@ -42,6 +41,8 @@ namespace Microsoft.AspNetCore {
       //    contract.IncludeExposedAmbientFieldInstances("dtHandle");
       //  }
       //);
+
+      services.AddSwaggerGenSmartStandardsFlavored();
 
     }
 
@@ -60,7 +61,7 @@ namespace Microsoft.AspNetCore {
       //required for the www-root
       app.UseStaticFiles();
 
-      //app.UseAmbientFieldAdapterMiddleware();
+      app.UseAmbientFieldAdapterMiddleware();
 
       if (!config.GetValue<bool>("ProdMode")) {
         app.UseDeveloperExceptionPage();

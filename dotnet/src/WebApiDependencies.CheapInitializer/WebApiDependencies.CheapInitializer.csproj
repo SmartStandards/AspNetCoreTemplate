@@ -102,6 +102,4 @@
     <Error Condition="!Exists('$(MSBuildProjectFullPath)') OR '$(TargetFrameworkIdentifier)' == '.NETFramework'" Text="This package requires ASP.NET Core (FrameworkReference to 'Microsoft.AspNetCore.App')." />
   </Target>
 
-
-
 </Project>

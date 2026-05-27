@@ -18,25 +18,26 @@ namespace TemplateNamespace {
     static partial void OnConfigureServices(IServiceCollection services, IConfiguration config) {
 
       //optional: will do some standardized basics for you...
-      //SmartStandardsCheapInitializer.OnConfigureServices(services, config);
+      SmartStandardsCheapInitializer.OnConfigureServices(services, config);
 
-      services.AddSmartStandardsLogging(config);
+      //services.AddSmartStandardsLogging(config);
 
       MyDemoService myDemoService = new MyDemoService();
 
       services.AddSingleton<IMyDemoService>(myDemoService);
 
-      services.AddControllers();
+      //services.AddControllers();
 
-      UjmwHostConfiguration.UseCombinedDynamicAssembly = true;
+      //UjmwHostConfiguration.UseCombinedDynamicAssembly = true;
       services.AddDynamicUjmwControllers((r) => {
 
         r.AddControllerFor<IMyDemoService>((options) => {
+          options.ApiGroupName = "Demo";
         });
 
       });
 
-      //services.AddOpenApi();
+      //services.AddSwaggerGenSmartStandardsFlavored();
 
     }
 
@@ -46,37 +47,37 @@ namespace TemplateNamespace {
     ) {
 
       //optional: will do some standardized basics for you...
-      //SmartStandardsCheapInitializer.OnRunApplication(app, config, services, environment, lifetime);
+      SmartStandardsCheapInitializer.OnRunApplication(app, config, services, environment, lifetime);
 
-      ILoggerFactory loggerFactory = services.GetRequiredService<ILoggerFactory>();
+      //ILoggerFactory loggerFactory = services.GetRequiredService<ILoggerFactory>();
 
-      // Configure the HTTP request pipeline.
-      if (environment.IsDevelopment()) {
-        //app.MapOpenApi();
-      }
+      //// Configure the HTTP request pipeline.
+      //if (environment.IsDevelopment()) {
+      //  //app.MapOpenApi();
+      //}
 
-      //required for the www-root
-      app.UseStaticFiles();
+      ////required for the www-root
+      //app.UseStaticFiles();
 
-      //app.UseAmbientFieldAdapterMiddleware();
+      ////app.UseAmbientFieldAdapterMiddleware();
 
-      if (!config.GetValue<bool>("ProdMode")) {
-        app.UseDeveloperExceptionPage();
-      }
+      //if (!config.GetValue<bool>("ProdMode")) {
+      //  app.UseDeveloperExceptionPage();
+      //}
 
-      app.UseHttpsRedirection();
+      //app.UseHttpsRedirection();
 
-      app.UseRouting();
+      //app.UseRouting();
 
-      //CORS: muss zwischen 'UseRouting' und 'UseEndpoints' liegen!
-      app.UseCors(
-        (p) => p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
-      );
+      ////CORS: muss zwischen 'UseRouting' und 'UseEndpoints' liegen!
+      //app.UseCors(
+      //  (p) => p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
+      //);
 
-      //app.UseAuthentication(); //<< WINDOWS-AUTH
-      app.UseAuthorization();
+      ////app.UseAuthentication(); //<< WINDOWS-AUTH
+      //app.UseAuthorization();
 
-      app.MapControllers();
+      //app.MapControllers();
 
       DevLogger.LogInformation(2090995669573058480L, EventKind.WebApplicationStarted);
 

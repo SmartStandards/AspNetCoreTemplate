@@ -430,7 +430,7 @@ namespace TemplateNamespace {
           //UNSAFE
           errorMessage = ex.Message;
 
-          string errorPageHtml = $"<html><body><p>{errorMessage}</p></body></html>";
+          string errorPageHtml = $"<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Error</title><body style=\"margin:0;min-height:100vh;background:#8b0000;font-family:Consolas,Monaco,'Courier New',monospace;color:#220;display:flex;align-items:center;justify-content:flex-start;padding:4rem\"><main style=\"width:min(1100px,calc(100vw - 8rem));background:#fff5f5;border-radius:18px;box-shadow:0 24px 80px #0006;padding:2rem;text-align:left;white-space:pre-wrap;overflow:auto\"><h1 style=\"margin:0 0 1rem;color:#8b0000;font-size:1.6rem\">Error</h1><pre style=\"margin:0;font:inherit;line-height:1.0;font-size:0.8rem\"><b>{ex.GetType().Name}</b>: {ex.Message}<br>\r\n<i>{ex.StackTrace.Replace(" in ", Environment.NewLine + "in ").Replace(Environment.NewLine, "<br>\r\n").TrimStart()}</i></pre></main></body></html>";
 
           byte[] errorBytes = Encoding.UTF8.GetBytes(errorPageHtml);
           MemoryStream errorStream = new MemoryStream(errorBytes);

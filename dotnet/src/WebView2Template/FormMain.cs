@@ -24,7 +24,7 @@ namespace TemplateNamespace {
 
     private void FormMain_Load(object sender, EventArgs e) {
 
-      Program._AspApplication.Attach(webView2Control, "/");
+      Program._AspApplication.Attach(webView2Control);
 
     }
 

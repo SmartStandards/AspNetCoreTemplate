@@ -42,6 +42,10 @@
   </ItemGroup>
 
   <ItemGroup>
+
+    <!-- any additional MS-near references to get complete access to asp, is provided by this dependency-package: -->
+    <!--<PackageReference Include="SmartStandards.WebApiDependencies.AspNetCore.net10.0" Version="10.0.0" />-->
+    <!-- TODO: COMMENT THIS IN ^^^^^^ - after ProjectReference to 'WebApiDependencies.CheapInitializer' was removed!!! -->
     
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
 
