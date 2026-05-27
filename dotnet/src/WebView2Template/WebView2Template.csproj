@@ -1,0 +1,118 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <BaseOutputPath>..\..\dist\bin-net10.0</BaseOutputPath>
+    <AssemblyName>WebView2Template</AssemblyName>
+    <Title>WebView2Template</Title>
+    <ApplicationIcon>window_earth.ico</ApplicationIcon>
+    <IsPublishable>False</IsPublishable>
+    <PackageId>WebView2Template</PackageId>
+    <Authors>SmartStandards</Authors>
+    <Company>SmartStandards</Company>
+    <Product>WebView2Template</Product>
+    <Platforms>x64;x86</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="BrowserForm.cs" />
+    <Compile Remove="BrowserForm.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="BrowserForm.resx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="window_earth.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="SmartStandards.Logging" Version="3.4.3" />
+    <PackageReference Include="UJMW.DynamicClient" Version="5.4.0" />
+
+    <!-- THIS APP CONTAINS AN SEAMLESS BROWSER CONTROL WITHIN ITS UI -->
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3967.48" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="8.0.0" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.OpenApi" Version="1.6.23" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.4" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.1.4" />
+    
+    <PackageReference Include="UJMW.DynamicController" Version="5.4.0" />
+    <PackageReference Include="SmartStandards.AuthTokenHandling.MvcSupport" Version="5.1.0" />
+    <PackageReference Include="SmartStandards.Logging.AspSupport" Version="3.4.3" />
+    
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+    <Folder Include="[MyProject]\" />
+  </ItemGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutputPath>..\..\dist\bin-net8.0\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <NoWarn>1701;1702;1591</NoWarn>
+    <DefineConstants>TRACE;DEBUG;NET5</DefineConstants>
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <OutputPath>..\..\dist\bin-net8.0\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <NoWarn>1701;1702;1591</NoWarn>
+    <DefineConstants>TRACE;DEBUG;NET5</DefineConstants>
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutputPath>..\..\dist\bin-net8.0\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <NoWarn>1701;1702;1591</NoWarn>
+    <DefineConstants>TRACE;NET5</DefineConstants>
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <OutputPath>..\..\dist\bin-net8.0\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <NoWarn>1701;1702;1591</NoWarn>
+    <DefineConstants>TRACE;NET5</DefineConstants>
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <Import Project="..\AspNetCoreTemplate.Demo\AspNetCoreTemplate.Demo.projitems" Label="Shared" />
+  
+</Project>

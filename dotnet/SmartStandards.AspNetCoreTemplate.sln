@@ -19,6 +19,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCoreTemplate", "src\A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiDependencies.CheapInitializer", "src\WebApiDependencies.CheapInitializer\WebApiDependencies.CheapInitializer.csproj", "{B828F7D3-DD7C-4B38-2858-07594C635EFD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebView2Template", "src\WebView2Template\WebView2Template.csproj", "{1CE4D5A6-5D40-3372-BA9F-EAB956DD8102}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AspNetCoreTemplate.Demo", "src\AspNetCoreTemplate.Demo\AspNetCoreTemplate.Demo.shproj", "{CF0A161A-99BA-4F01-AF5E-16C6FCBC85AE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,10 @@ Global
 		{B828F7D3-DD7C-4B38-2858-07594C635EFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B828F7D3-DD7C-4B38-2858-07594C635EFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B828F7D3-DD7C-4B38-2858-07594C635EFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CE4D5A6-5D40-3372-BA9F-EAB956DD8102}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{1CE4D5A6-5D40-3372-BA9F-EAB956DD8102}.Debug|Any CPU.Build.0 = Debug|x64
+		{1CE4D5A6-5D40-3372-BA9F-EAB956DD8102}.Release|Any CPU.ActiveCfg = Release|x64
+		{1CE4D5A6-5D40-3372-BA9F-EAB956DD8102}.Release|Any CPU.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -40,8 +48,15 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{39140008-EED8-4108-B107-EB946E01B9CA} = {EFB5135D-039A-4D92-8FDD-9EA5D070F991}
 		{B828F7D3-DD7C-4B38-2858-07594C635EFD} = {EFB5135D-039A-4D92-8FDD-9EA5D070F991}
+		{1CE4D5A6-5D40-3372-BA9F-EAB956DD8102} = {EFB5135D-039A-4D92-8FDD-9EA5D070F991}
+		{CF0A161A-99BA-4F01-AF5E-16C6FCBC85AE} = {EFB5135D-039A-4D92-8FDD-9EA5D070F991}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D2F37C1D-32F0-4BF2-AAEB-46B9D8C07D23}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		src\AspNetCoreTemplate.Demo\AspNetCoreTemplate.Demo.projitems*{1ce4d5a6-5d40-3372-ba9f-eab956dd8102}*SharedItemsImports = 5
+		src\AspNetCoreTemplate.Demo\AspNetCoreTemplate.Demo.projitems*{39140008-eed8-4108-b107-eb946e01b9ca}*SharedItemsImports = 5
+		src\AspNetCoreTemplate.Demo\AspNetCoreTemplate.Demo.projitems*{cf0a161a-99ba-4f01-af5e-16c6fcbc85ae}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal

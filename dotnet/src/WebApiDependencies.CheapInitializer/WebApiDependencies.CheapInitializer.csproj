@@ -59,21 +59,21 @@
     
     [implicitely provided by 'Microsoft.AspNetCore.App']
 
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="5.0.17" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.0" NoWarn="NU1605" />
-    <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Cors" Version="2.2.0" />
+    <PackageReference Include=_"Microsoft.AspNetCore" Version="2.2.0" />
+    <PackageReference Include=_"Microsoft.AspNetCore.Authentication.Negotiate" Version="5.0.17" />
+    <PackageReference Include=_"Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.0" NoWarn="NU1605" />
+    <PackageReference Include=_"Microsoft.AspNetCore.Cors" Version="2.2.0" />
+    <PackageReference Include=_"Microsoft.AspNetCore.Http" Version="2.2.2" />
+    <PackageReference Include=_"Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+    <PackageReference Include=_"Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+    <PackageReference Include=_"Microsoft.AspNetCore.Mvc.Cors" Version="2.2.0" />
     
     [implicitely provided by .NET CORE]
-    <PackageReference Include="System.Text.Encodings.Web" Version="6.0.0" />
-    <PackageReference Include="System.Runtime" Version="4.3.1" />
+    <PackageReference Include=_"System.Text.Encodings.Web" Version="6.0.0" />
+    <PackageReference Include=_"System.Runtime" Version="4.3.1" />
 
     [old WCF-related reference]
-    <PackageReference Include="System.ServiceModel.Primitives" Version="4.6.0" />
+    <PackageReference Include=_"System.ServiceModel.Primitives" Version="4.6.0" />
        
     -->
 

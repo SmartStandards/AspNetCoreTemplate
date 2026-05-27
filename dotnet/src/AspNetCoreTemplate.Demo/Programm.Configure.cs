@@ -1,6 +1,6 @@
-using DistributedDataFlow;
-using Logging.SmartStandards;
+﻿using Logging.SmartStandards;
 using Logging.SmartStandards.AspSupport;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -11,44 +11,42 @@ using System;
 using System.Reflection;
 using System.Web.UJMW;
 
-[assembly: AssemblyMetadata("SourceContext", "SmartStandards.WebApiDependencies.CheapInitializer")]
+namespace TemplateNamespace {
 
-namespace Microsoft.AspNetCore {
+  public static partial class Program {
 
-  public static class SmartStandardsCheapInitializer {
+    static partial void OnConfigureServices(IServiceCollection services, IConfiguration config) {
 
-    public static void OnConfigureServices(IServiceCollection services, IConfiguration config) {
+      //optional: will do some standardized basics for you...
+      //SmartStandardsCheapInitializer.OnConfigureServices(services, config);
 
       services.AddSmartStandardsLogging(config);
+
+      MyDemoService myDemoService = new MyDemoService();
+
+      services.AddSingleton<IMyDemoService>(myDemoService);
 
       services.AddControllers();
 
       UjmwHostConfiguration.UseCombinedDynamicAssembly = true;
+      services.AddDynamicUjmwControllers((r) => {
 
+        r.AddControllerFor<IMyDemoService>((options) => {
+        });
+
+      });
 
       //services.AddOpenApi();
 
-      //string applicationAssemblyName = Assembly.GetCallingAssembly().GetName().Name;
-
-      //UjmwHostConfiguration.AuthHeaderEvaluator =
-      //  Security.AccessTokenHandling.AccessTokenValidator.TryValidateHttpAuthHeader;
-
-      //TODO: addswagger
-
-      //AmbienceHub.DefineFlowingContract(
-      //  "tenant-identifiers",
-      //  (contract) => {
-      //    contract.IncludeExposedAmbientFieldInstances("currentTenant");
-      //    contract.IncludeExposedAmbientFieldInstances("dtHandle");
-      //  }
-      //);
-
     }
 
-    public static void OnRunApplication(
+    static partial void OnRunApplication(
       WebApplication app, IConfiguration config, IServiceProvider services,
       IWebHostEnvironment environment, IHostApplicationLifetime lifetime
     ) {
+
+      //optional: will do some standardized basics for you...
+      //SmartStandardsCheapInitializer.OnRunApplication(app, config, services, environment, lifetime);
 
       ILoggerFactory loggerFactory = services.GetRequiredService<ILoggerFactory>();
 
@@ -79,6 +77,8 @@ namespace Microsoft.AspNetCore {
       app.UseAuthorization();
 
       app.MapControllers();
+
+      DevLogger.LogInformation(2090995669573058480L, EventKind.WebApplicationStarted);
 
     }
 
