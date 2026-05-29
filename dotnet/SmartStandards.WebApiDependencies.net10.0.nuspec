@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>SmartStandards.WebApiDependencies.net10.0</id>
-    <version>10.0.8</version>
+    <version>10.0.9</version>
     <title>SmartStandards WebApiDependencies (ASP.NET Core + common SmartStandards packages)</title>
     <authors>SmartStandards</authors>
     <owners>(public domain)</owners>
@@ -23,27 +23,27 @@
 
         <!-- regarding any Microsoft packages, we rely on the base reference package... -->
         
-        <dependency id="SmartStandards.WebApiDependencies.AspNetCore.net10.0" version="[10.0.8]" />
+        <dependency id="SmartStandards.WebApiDependencies.AspNetCore.net10.0" version="[10.0.9]" />
       
         <!-- ...and extend these here with the state-of-the-art packages from the 'SmartStandards' ecosystem -->
 
         <dependency id="Newtonsoft.Json" version="13.0.4" />
         
         <dependency id="Snowflake44" version="3.7.0" />
-        <dependency id="SmartStandards.Essentials" version="0.8.0" />
+        <dependency id="SmartStandards.Essentials" version="1.0.0" />
         
         <dependency id="SmartStandards.Logging" version="3.4.3" />
         <dependency id="SmartStandards.Logging.AspSupport" version="3.4.3" />
         <dependency id="SmartStandards.Logging.Centralized" version="3.3.1" />
         
-        <dependency id="UJMW.DynamicController" version="5.4.0" />
-        <dependency id="UJMW.DynamicClient" version="5.4.0" />
+        <dependency id="UJMW.DynamicController" version="5.5.1" />
+        <dependency id="UJMW.DynamicClient" version="5.5.1" />
         
-        <dependency id="SmartStandards.AuthTokenHandling" version="5.0.10" />
-        <dependency id="SmartStandards.AuthTokenHandling.MvcSupport" version="5.0.10" />
+        <dependency id="SmartStandards.AuthTokenHandling" version="5.1.0" />
+        <dependency id="SmartStandards.AuthTokenHandling.MvcSupport" version="5.1.0" />
         
-        <dependency id="SmartAmbience" version="2.4.8" />
-        <dependency id="SmartAmbience.MvcSupport" version="2.4.8" />
+        <dependency id="SmartAmbience" version="2.5.1" />
+        <dependency id="SmartAmbience.MvcSupport" version="2.5.1" />
 
       </group>
     </dependencies>
