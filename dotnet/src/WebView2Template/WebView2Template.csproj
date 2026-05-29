@@ -45,14 +45,14 @@
 
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="SmartStandards.Logging" Version="3.4.3" />
-    <PackageReference Include="UJMW.DynamicClient" Version="5.4.0" />
+    <PackageReference Include="UJMW.DynamicClient" Version="5.5.1" />
 
     <!-- THIS APP CONTAINS AN SEAMLESS BROWSER CONTROL WITHIN ITS UI -->
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3967.48" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="8.0.0" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     
-    <PackageReference Include="UJMW.DynamicController" Version="5.4.0" />
+    <PackageReference Include="UJMW.DynamicController" Version="5.5.1" />
     <PackageReference Include="SmartStandards.AuthTokenHandling.MvcSupport" Version="5.1.0" />
     <PackageReference Include="SmartStandards.Logging.AspSupport" Version="3.4.3" />
 
@@ -74,6 +74,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Update="WebViewAspNetCoreAdapter.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>WebViewAspNetCoreAdapter.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -88,6 +93,11 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Update="WebViewAspNetCoreAdapter.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>WebViewAspNetCoreAdapter.cs</LastGenOutput>
+      <CustomToolNamespace>TemplateNamespace</CustomToolNamespace>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -95,8 +105,12 @@
     <Folder Include="[MyProject]\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutputPath>..\..\dist\bin-net8.0\</OutputPath>
+    <OutputPath>..\..\dist\bin-net10.0\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <NoWarn>1701;1702;1591</NoWarn>
     <DefineConstants>TRACE;DEBUG;NET5</DefineConstants>
@@ -104,7 +118,7 @@
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <OutputPath>..\..\dist\bin-net8.0\</OutputPath>
+    <OutputPath>..\..\dist\bin-net10.0\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <NoWarn>1701;1702;1591</NoWarn>
     <DefineConstants>TRACE;DEBUG;NET5</DefineConstants>
@@ -112,7 +126,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutputPath>..\..\dist\bin-net8.0\</OutputPath>
+    <OutputPath>..\..\dist\bin-net10.0\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <NoWarn>1701;1702;1591</NoWarn>
     <DefineConstants>TRACE;NET5</DefineConstants>
@@ -120,7 +134,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <OutputPath>..\..\dist\bin-net8.0\</OutputPath>
+    <OutputPath>..\..\dist\bin-net10.0\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <NoWarn>1701;1702;1591</NoWarn>
     <DefineConstants>TRACE;NET5</DefineConstants>

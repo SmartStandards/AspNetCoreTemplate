@@ -49,16 +49,16 @@
     
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
 
-    <PackageReference Include="UJMW.DynamicClient" Version="5.4.0" />
-    <PackageReference Include="UJMW.DynamicController" Version="5.4.0" />
+    <PackageReference Include="UJMW.DynamicClient" Version="5.5.1" />
+    <PackageReference Include="UJMW.DynamicController" Version="5.5.1" />
 
-    <PackageReference Include="SmartStandards.AuthTokenHandling" Version="5.0.10" />
-    <PackageReference Include="SmartStandards.AuthTokenHandling.MvcSupport" Version="5.0.10" />
+    <PackageReference Include="SmartStandards.AuthTokenHandling" Version="5.1.0" />
+    <PackageReference Include="SmartStandards.AuthTokenHandling.MvcSupport" Version="5.1.0" />
 
-    <PackageReference Include="SmartAmbience" Version="2.4.8" />
-    <PackageReference Include="SmartAmbience.MvcSupport" Version="2.4.8" />
+    <PackageReference Include="SmartAmbience" Version="2.5.1" />
+    <PackageReference Include="SmartAmbience.MvcSupport" Version="2.5.1" />
 
-    <PackageReference Include="SmartStandards.Essentials" Version="0.8.0" />
+    <PackageReference Include="SmartStandards.Essentials" Version="1.0.0" />
 
     <PackageReference Include="SmartStandards.Logging" Version="3.4.3" />
     <PackageReference Include="SmartStandards.Logging.AspSupport" Version="3.4.3" />

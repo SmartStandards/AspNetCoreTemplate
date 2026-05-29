@@ -7,8 +7,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Security.AccessTokenHandling;
 using System;
 using System.Reflection;
+using System.Text;
 using System.Web.UJMW;
 
 namespace TemplateNamespace {
@@ -25,6 +27,15 @@ namespace TemplateNamespace {
       MyDemoService myDemoService = new MyDemoService();
 
       services.AddSingleton<IMyDemoService>(myDemoService);
+
+      UjmwHostConfiguration.AuthHeaderEvaluator = AccessTokenValidator.TryValidateHttpAuthHeader;
+      AccessTokenValidator.ConfigureTokenValidation(
+        new LocalJwtIntrospector(Encoding.UTF8.GetBytes("MyDemoJwtH256SignKey")),
+        (options) => {
+          //this makes tokens optional (if none is provided, were acting as subject '(anonymous)')
+          options.EnableAnonymousSubject("(anonymous)");
+        }
+      );
 
       //services.AddControllers();
 
