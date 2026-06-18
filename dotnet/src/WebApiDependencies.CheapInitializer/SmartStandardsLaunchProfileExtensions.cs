@@ -13,7 +13,7 @@ namespace Microsoft.AspNetCore {
 
   public static class SmartStandardsLaunchProfileExtensions {
 
-    public static void UseUrlsFromLaunchProfileIfRequested(this ConfigureWebHostBuilder webHost, string[] args) {
+    public static void UseUrlsFromLaunchProfileIfRequested(this IWebHostBuilder webHost, string[] args) {
 
       string foundArg = args.Where(
         (a) => a.StartsWith("LaunchProfile=", StringComparison.CurrentCultureIgnoreCase)
@@ -43,7 +43,7 @@ namespace Microsoft.AspNetCore {
     }
 
     public static void UseUrlsFromLaunchProfile(
-      this ConfigureWebHostBuilder webHost,
+      this IWebHostBuilder webHost,
       string launchProfileFullFileName,
       string profileNameOrIndex
     ) {
