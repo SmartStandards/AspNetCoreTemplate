@@ -52,6 +52,8 @@
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="8.0.0" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.0" />
+    
     <PackageReference Include="UJMW.DynamicController" Version="5.5.1" />
     <PackageReference Include="SmartStandards.AuthTokenHandling.MvcSupport" Version="5.1.0" />
     <PackageReference Include="SmartStandards.Logging.AspSupport" Version="3.4.3" />

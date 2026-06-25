@@ -24,12 +24,34 @@ namespace TemplateNamespace {
 
     public static void Main(string[] args) {
 
-      WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+      string explicitLaunchProfile = null;
+      LaunchProfileHelper launchProfileHelper;
+      if (LaunchProfileHelper.TryPickLaunchProfileFromCommandlineArgs(args, out explicitLaunchProfile)) {
+        launchProfileHelper = LaunchProfileHelper.CreateForCurrentLaunchsettingsJson();
+      }
+      else {
+        launchProfileHelper = LaunchProfileHelper.CreateEmpty();
+      }
+
+      WebApplicationBuilder builder;
       // :IHostApplicationBuilder
+
+      if (launchProfileHelper.TryGetAspEnvironmentNameFromLaunchProfile(explicitLaunchProfile, out string aspEnvironmentName)) {
+        builder = WebApplication.CreateBuilder(
+          new WebApplicationOptions {Args = args, EnvironmentName = aspEnvironmentName }
+        );
+      }
+      else {
+        builder = WebApplication.CreateBuilder(args);
+      }
+
+      builder.AddBranchSpecificConfigurationFiles();
 
       IWebHostBuilder webHostBuilder = builder.WebHost;
 
-      webHostBuilder.UseUrlsFromLaunchProfileIfRequested(args);
+      if (launchProfileHelper.TryGetUrlsFromLaunchProfile(explicitLaunchProfile, out string[] explicitUrls)) {
+        webHostBuilder.UseUrls(explicitUrls);
+      }
 
       //webHostBuilder.UseUrls(...);
       //webHostBuilder.UseContentRoot(AppContext.BaseDirectory);
