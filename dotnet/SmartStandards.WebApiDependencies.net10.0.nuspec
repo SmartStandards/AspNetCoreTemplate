@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>SmartStandards.WebApiDependencies.net10.0</id>
-    <version>10.0.9</version>
+    <version>10.0.10</version>
     <title>SmartStandards WebApiDependencies (ASP.NET Core + common SmartStandards packages)</title>
     <authors>SmartStandards</authors>
     <owners>(public domain)</owners>
@@ -23,7 +23,7 @@
 
         <!-- regarding any Microsoft packages, we rely on the base reference package... -->
         
-        <dependency id="SmartStandards.WebApiDependencies.AspNetCore.net10.0" version="[10.0.9]" />
+        <dependency id="SmartStandards.WebApiDependencies.AspNetCore.net10.0" version="[10.0.10]" />
       
         <!-- ...and extend these here with the state-of-the-art packages from the 'SmartStandards' ecosystem -->
 

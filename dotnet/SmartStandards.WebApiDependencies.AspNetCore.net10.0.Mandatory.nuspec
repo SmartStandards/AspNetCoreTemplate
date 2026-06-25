@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>SmartStandards.WebApiDependencies.AspNetCore.net10.0.Mandatory</id>
-    <version>10.0.9</version>
+    <version>10.0.10</version>
     <title>SmartStandards WebApiDependencies (ASP.NET Core - requires EXACT mandatory versions)</title>
     <authors>SmartStandards</authors>
     <owners>(public domain)</owners>
