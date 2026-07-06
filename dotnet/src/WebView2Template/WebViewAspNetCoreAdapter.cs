@@ -166,7 +166,11 @@ namespace TemplateNamespace {
 
     }
 
-    public void Attach(Microsoft.Web.WebView2.WinForms.WebView2 webView2, string navigateTo = "/") {
+    public void Attach(
+      Microsoft.Web.WebView2.WinForms.WebView2 webView2, 
+      string navigateTo = "/",
+      string webviewEnvDirectory = null
+    ) {
 
       lock (_AttachedWebviews) {
         if (_AttachedWebviews.Contains(webView2)) {
@@ -187,14 +191,22 @@ namespace TemplateNamespace {
         };
 
         string scheme = _BaseAddress.Substring(0, _BaseAddress.IndexOf(':'));
+        CoreWebView2EnvironmentOptions options = null;
+
+        //string webviewEnvDirectory = Path.Combine(
+        //  Path.GetTempPath(), "WebView2-Profile-" + scheme + Guid.NewGuid().ToString("N")
+        //);
+        if (string.IsNullOrWhiteSpace(webviewEnvDirectory)) {
+          webviewEnvDirectory = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            Assembly.GetExecutingAssembly().GetName().Name,
+            "WebView2Env"
+          );
+        }
 
         if (_BaseAddressHasCustomScheme) {
 
           //when using custom schemes (like 'app:') we need to initialize an dedicated 'environment' supporting this...
-
-          string userDataFolder = Path.Combine(
-            Path.GetTempPath(), "WebView2-Profile-" + scheme + Guid.NewGuid().ToString("N")
-          );
 
           CoreWebView2CustomSchemeRegistration registration = new CoreWebView2CustomSchemeRegistration(scheme);
           registration.HasAuthorityComponent = true;
@@ -203,17 +215,15 @@ namespace TemplateNamespace {
           List<CoreWebView2CustomSchemeRegistration> registrations = new List<CoreWebView2CustomSchemeRegistration>();
           registrations.Add(registration);
 
-          CoreWebView2EnvironmentOptions options = new CoreWebView2EnvironmentOptions(customSchemeRegistrations: registrations);
+          options = new CoreWebView2EnvironmentOptions(customSchemeRegistrations: registrations);
 
-          CoreWebView2Environment environment = CoreWebView2Environment.CreateAsync(
-            options: options, userDataFolder: userDataFolder
-          ).GetAwaiter().GetResult();
+        }
 
-          webView2.EnsureCoreWebView2Async(environment); 
-        }
-        else {
-          webView2.EnsureCoreWebView2Async();
-        }
+        CoreWebView2Environment environment = CoreWebView2Environment.CreateAsync(
+          options: options, userDataFolder: webviewEnvDirectory
+        ).GetAwaiter().GetResult();
+
+        webView2.EnsureCoreWebView2Async(environment); 
 
         //task has startet, but we dont wait to avoid blocking whe messageloop
         //-> the event handler will be called once initialization is complete
