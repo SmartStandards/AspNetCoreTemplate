@@ -189,9 +189,12 @@ namespace SmartStandards {
 
         options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme {
           Type = SecuritySchemeType.OAuth2,
-          Scheme = "oauth2",
-          Name = "Authorization",
-          In = ParameterLocation.Header
+          Flows = new OpenApiOAuthFlows {
+            Implicit = new OpenApiOAuthFlow {
+              AuthorizationUrl = new Uri(oAuthUrl),
+              Scopes = scopesWithLabels
+            }
+          }
         });
 
         options.AddSecurityRequirement(
