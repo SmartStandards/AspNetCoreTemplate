@@ -20,6 +20,7 @@ using System.ServiceModel;
 using System.Web.UJMW.SelfAnnouncement;
 using System.Web.UJMW;
 using System;
+using System.Text.RegularExpressions;
 
 // This is a partial copy of the SmartStandards UJMW Library.
 // It is intended to be used as an alternative when including the NuGet package is not feasible.
@@ -85,6 +86,12 @@ namespace SmartStandards {
       _OAuthUrlResolver = oAuthUrlResolver;
     }
 
+    //prüft ob ed eine http/s url ist (query-params erlaubt)
+    Regex _IsUrlRegex = new Regex(
+      "^https?:\\/\\/(?:[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)(?::\\d{1,5})?(?:\\/[^\\s?#]*)?(?:\\?[^\\s#]*)?(?:#[^\\s]*)?$",
+      RegexOptions.Compiled
+    );
+
     /// <summary>
     /// Configures the SwaggerGenOptions for the API documentation generation.
     /// </summary>
@@ -148,11 +155,15 @@ namespace SmartStandards {
       //TODO: evtl wenn wir selbst eine oatuh-route haben!!!!!!!!
 
       if(_OAuthUrlResolver != null) {
-        oAuthUrl = _OAuthUrlResolver(oAuthUrl);
+        try {
+          oAuthUrl = _OAuthUrlResolver(oAuthUrl);
+        }
+        catch(Exception ex) {
+          oAuthUrl = null;
+        }
       }
 
-      if (!string.IsNullOrWhiteSpace(oAuthClientId) && !string.IsNullOrWhiteSpace(oAuthUrl)) {
-
+      if (!string.IsNullOrWhiteSpace(oAuthClientId) && !string.IsNullOrWhiteSpace(oAuthUrl) && _IsUrlRegex.IsMatch(oAuthUrl)) {
 
         string oAuthScopeExpression = _Configuration.GetValue<string>("OAuthScopeExpressionForSwaggerUi", "");
         string[] splittedOAuthScopes = oAuthScopeExpression.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToArray();
