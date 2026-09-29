@@ -49,21 +49,21 @@
     
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
 
-    <PackageReference Include="UJMW.DynamicClient" Version="5.5.1" />
-    <PackageReference Include="UJMW.DynamicController" Version="5.5.1" />
+    <PackageReference Include="UJMW.DynamicClient" Version="5.6.2" />
+    <PackageReference Include="UJMW.DynamicController" Version="5.6.2" />
 
-    <PackageReference Include="SmartStandards.AuthTokenHandling" Version="5.1.0" />
-    <PackageReference Include="SmartStandards.AuthTokenHandling.MvcSupport" Version="5.1.0" />
+    <PackageReference Include="SmartStandards.AuthTokenHandling" Version="5.1.1" />
+    <PackageReference Include="SmartStandards.AuthTokenHandling.MvcSupport" Version="5.1.1" />
 
-    <PackageReference Include="SmartAmbience" Version="2.5.1" />
-    <PackageReference Include="SmartAmbience.MvcSupport" Version="2.5.1" />
+    <PackageReference Include="SmartAmbience" Version="3.2.1" />
+    <PackageReference Include="SmartAmbience.MvcSupport" Version="3.2.1" />
 
-    <PackageReference Include="SmartStandards.Essentials" Version="1.0.0" />
+    <PackageReference Include="SmartStandards.Essentials" Version="1.0.1" />
 
-    <PackageReference Include="SmartStandards.Logging" Version="3.4.3" />
-    <PackageReference Include="SmartStandards.Logging.AspSupport" Version="3.4.3" />
+    <PackageReference Include="SmartStandards.Logging" Version="3.4.4" />
+    <PackageReference Include="SmartStandards.Logging.AspSupport" Version="3.4.4" />
 
-    <PackageReference Include="Snowflake44" Version="3.7.0" />
+    <PackageReference Include="Snowflake44" Version="3.8.3" />
     
   </ItemGroup>
   
