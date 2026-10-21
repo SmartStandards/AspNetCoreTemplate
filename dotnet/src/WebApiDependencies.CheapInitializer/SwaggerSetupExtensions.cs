@@ -9,9 +9,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi;
+using Security.AccessTokenHandling;
 using SmartStandards;
 using Swashbuckle.AspNetCore;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -59,6 +61,83 @@ namespace Microsoft.AspNetCore.Builder {
 
     }
 
+    /// <summary>
+    /// Convenience overload: adds the SmartStandards-flavored Swagger generation, where ALL API groups
+    /// offer the given AuthTokenConfig as single token source (scheme name = 'default').
+    /// Behaves like the overload with resolver (no config keys, '{RequestBaseUrl}' placeholder, scopes
+    /// from Claims["scope"], late evaluation).
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="authTokenConfig">The AuthTokenConfig, which describes the token source.</param>
+    public static void AddSwaggerGenSmartStandardsFlavored(
+      this IServiceCollection services, AuthTokenConfig authTokenConfig
+    ) {
+
+      if (authTokenConfig == null) {
+        throw new ArgumentNullException(nameof(authTokenConfig));
+      }
+
+      // the instance is captured by reference: later changes of its properties are
+      // still reflected, because the resolver is evaluated as late as possible
+      KeyValuePair<string, AuthTokenConfig>[] tokenSources = new KeyValuePair<string, AuthTokenConfig>[] {
+        new KeyValuePair<string, AuthTokenConfig>(DefaultTokenSourceId, authTokenConfig)
+      };
+
+      services.AddSwaggerGenSmartStandardsFlavored(
+        (string apiGroupName) => tokenSources
+      );
+
+    }
+
+    /// <summary>
+    /// Token source id used by the convenience overload, which accepts a single AuthTokenConfig instance
+    /// ('default' = magic id of the default token source, see AuthTokenHandling).
+    /// </summary>
+    public const string DefaultTokenSourceId = "default";
+
+    /// <summary>
+    /// Adds the SmartStandards-flavored Swagger generation, where the security schemes of each API group
+    /// are derived from the given resolver (apiGroupName -> token source id + AuthTokenConfig),
+    /// for example 'AccessTokenManager' of AuthTokenHandling. One security scheme per token source
+    /// (scheme name = token source id) is emitted into the document of the group.
+    /// The config keys 'OAuthClientIdForSwaggerUi', 'OAuthAuthorizeUrlForSwaggerUi' and
+    /// 'OAuthScopeExpressionForSwaggerUi' are NOT evaluated on this path.
+    /// The placeholder '{RequestBaseUrl}' within the URLs of an AuthTokenConfig is replaced per request
+    /// with the base URL of the request (scheme://host[:port] plus path base, without trailing slash).
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="authTokenConfigResolver">
+    /// Resolves the token sources (key = token source id) for an API group name.
+    /// An empty result means: no security information for this group.
+    /// </param>
+    public static void AddSwaggerGenSmartStandardsFlavored(
+      this IServiceCollection services, Func<string, KeyValuePair<string, AuthTokenConfig>[]> authTokenConfigResolver
+    ) {
+
+      if (authTokenConfigResolver == null) {
+        throw new ArgumentNullException(nameof(authTokenConfigResolver));
+      }
+
+      services.AddSwaggerGen();
+
+      services.AddTransient<IConfigureOptions<SwaggerGenOptions>, SmartStandardsSwaggerGenOptionsConfigurator>(
+        (p) => new SmartStandardsSwaggerGenOptionsConfigurator(
+          p.GetRequiredService<IApiDescriptionGroupCollectionProvider>(),
+          p.GetRequiredService<IConfiguration>(),
+          authTokenConfigResolver
+         )
+      );
+
+      services.AddTransient<IStartupFilter, SmartStandardsSwaggerStartupFilter>(
+        (p) => new SmartStandardsSwaggerStartupFilter(
+          p.GetRequiredService<IApiDescriptionGroupCollectionProvider>(),
+          p.GetRequiredService<IConfiguration>(),
+          authTokenConfigResolver
+        )
+       );
+
+    }
+
   }
 }
 
@@ -72,6 +151,8 @@ namespace SmartStandards {
 
     private readonly Func<string, string> _OAuthUrlResolver;
 
+    private readonly Func<string, KeyValuePair<string, AuthTokenConfig>[]> _AuthTokenConfigResolver;
+
     /// <summary>
     /// Creates a new instance of the UjmwStandardSwaggerGenOptionsConfigurator class.
     /// </summary>
@@ -84,6 +165,23 @@ namespace SmartStandards {
       _Provider = provider;
       _Configuration = configuration;
       _OAuthUrlResolver = oAuthUrlResolver;
+    }
+
+    /// <summary>
+    /// Creates a new instance of the UjmwStandardSwaggerGenOptionsConfigurator class,
+    /// which derives the security schemes per API group from the given resolver.
+    /// </summary>
+    /// <param name="provider"></param>
+    /// <param name="configuration"></param>
+    /// <param name="authTokenConfigResolver">apiGroupName -> token source id + AuthTokenConfig</param>
+    public SmartStandardsSwaggerGenOptionsConfigurator(
+      IApiDescriptionGroupCollectionProvider provider, IConfiguration configuration,
+      Func<string, KeyValuePair<string, AuthTokenConfig>[]> authTokenConfigResolver
+    ) {
+      _Provider = provider;
+      _Configuration = configuration;
+      _OAuthUrlResolver = null;
+      _AuthTokenConfigResolver = authTokenConfigResolver;
     }
 
     //prüft ob ed eine http/s url ist (query-params erlaubt)
@@ -110,118 +208,129 @@ namespace SmartStandards {
 
       options.EnableAnnotations(true, true);
 
-      #region " Bearer "
+      if (_AuthTokenConfigResolver != null) {
 
-      options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "API-TOKEN"
-      });
+        // one security scheme per token source (scheme name = token source id)
+        // plus a requirement per token source, emitted into the document of each API group
+        options.AddDocumentFilterInstance(new SmartStandardsAuthTokenConfigDocumentFilter(_AuthTokenConfigResolver));
 
-      //options.AddSecurityRequirement(
-      //  new OpenApiSecurityRequirement { {
-      //      new OpenApiSecurityScheme {
-      //        Reference = new OpenApiReference {
-      //          Type = ReferenceType.SecurityScheme,
-      //          Id = "Bearer"
-      //        }
-      //      },
-      //      new string[] {}
-      //    }}
-      //);
-
-      options.AddSecurityRequirement(
-        (OpenApiDocument document) => {
-          OpenApiSecurityRequirement reqirementsDict = new();
-          reqirementsDict.Add(
-            new OpenApiSecuritySchemeReference("Bearer", document),
-            new List<string>()
-          );
-          return reqirementsDict;
-        }
-      );
-
-      #endregion
-
-      #region " OAuth " 
-
-      //if (_Configuration.GetValue<bool>("EnableSwaggerUi")) 
-      string oAuthClientId = _Configuration.GetValue<string>("OAuthClientIdForSwaggerUi");
-      string oAuthUrl = _Configuration.GetValue<string>("OAuthAuthorizeUrlForSwaggerUi");
-
-      //TODO: evtl wenn wir selbst eine oatuh-route haben!!!!!!!!
-
-      if(_OAuthUrlResolver != null) {
-        try {
-          oAuthUrl = _OAuthUrlResolver(oAuthUrl);
-        }
-        catch(Exception ex) {
-          oAuthUrl = null;
-        }
       }
+      else {
 
-      if (!string.IsNullOrWhiteSpace(oAuthClientId) && !string.IsNullOrWhiteSpace(oAuthUrl) && _IsUrlRegex.IsMatch(oAuthUrl)) {
+        #region " Bearer "
 
-        string oAuthScopeExpression = _Configuration.GetValue<string>("OAuthScopeExpressionForSwaggerUi", "");
-        string[] splittedOAuthScopes = oAuthScopeExpression.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToArray();
+        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
+          Name = "Authorization",
+          Type = SecuritySchemeType.ApiKey,
+          Scheme = "Bearer",
+          BearerFormat = "JWT",
+          In = ParameterLocation.Header,
+          Description = "API-TOKEN"
+        });
 
-        Dictionary<string, string> scopesWithLabels = splittedOAuthScopes.Select(
-          scope => new KeyValuePair<string, string>(scope, $"Scope: {scope}")
-        ).ToDictionary(kv => kv.Key, kv => kv.Value);
-
-        //options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme {
-        //  Type = SecuritySchemeType.OAuth2,
-        //  Flows = new OpenApiOAuthFlows {
-        //    Implicit = new OpenApiOAuthFlow {
-        //      AuthorizationUrl = new Uri(oAuthUrl), // deine Auth-URL
-        //      Scopes = scopesWithLabels
-        //    }
-        //  }
-        //});
-
-        //// Security Requirement, damit Swagger UI die Authorisierung anfordert
         //options.AddSecurityRequirement(
         //  new OpenApiSecurityRequirement { {
-        //    new OpenApiSecurityScheme {
-        //      Reference = new OpenApiReference {
-        //        Type = ReferenceType.SecurityScheme,
-        //        Id = "oauth2"
+        //      new OpenApiSecurityScheme {
+        //        Reference = new OpenApiReference {
+        //          Type = ReferenceType.SecurityScheme,
+        //          Id = "Bearer"
+        //        }
         //      },
-        //      Scheme = "oauth2",
-        //      Name = "Authorization", //ACHTUNG: Header-Value ist mit prefix "JWT <token>"
-        //      In = ParameterLocation.Header
-        //    },
-        //    splittedOAuthScopes.ToList()
-        //  }}
+        //      new string[] {}
+        //    }}
         //);
-
-        options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme {
-          Type = SecuritySchemeType.OAuth2,
-          Flows = new OpenApiOAuthFlows {
-            Implicit = new OpenApiOAuthFlow {
-              AuthorizationUrl = new Uri(oAuthUrl),
-              Scopes = scopesWithLabels
-            }
-          }
-        });
 
         options.AddSecurityRequirement(
           (OpenApiDocument document) => {
             OpenApiSecurityRequirement reqirementsDict = new();
             reqirementsDict.Add(
-              new OpenApiSecuritySchemeReference("oauth2", document),
-              splittedOAuthScopes.ToList()
+              new OpenApiSecuritySchemeReference("Bearer", document),
+              new List<string>()
             );
             return reqirementsDict;
           }
         );
 
-      }
+        #endregion
 
-      #endregion
+        #region " OAuth " 
+
+        //if (_Configuration.GetValue<bool>("EnableSwaggerUi")) 
+        string oAuthClientId = _Configuration.GetValue<string>("OAuthClientIdForSwaggerUi");
+        string oAuthUrl = _Configuration.GetValue<string>("OAuthAuthorizeUrlForSwaggerUi");
+
+        //TODO: evtl wenn wir selbst eine oatuh-route haben!!!!!!!!
+
+        if(_OAuthUrlResolver != null) {
+          try {
+            oAuthUrl = _OAuthUrlResolver(oAuthUrl);
+          }
+          catch(Exception ex) {
+            oAuthUrl = null;
+          }
+        }
+
+        if (!string.IsNullOrWhiteSpace(oAuthClientId) && !string.IsNullOrWhiteSpace(oAuthUrl) && _IsUrlRegex.IsMatch(oAuthUrl)) {
+
+          string oAuthScopeExpression = _Configuration.GetValue<string>("OAuthScopeExpressionForSwaggerUi", "");
+          string[] splittedOAuthScopes = oAuthScopeExpression.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToArray();
+
+          Dictionary<string, string> scopesWithLabels = splittedOAuthScopes.Select(
+            scope => new KeyValuePair<string, string>(scope, $"Scope: {scope}")
+          ).ToDictionary(kv => kv.Key, kv => kv.Value);
+
+          //options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme {
+          //  Type = SecuritySchemeType.OAuth2,
+          //  Flows = new OpenApiOAuthFlows {
+          //    Implicit = new OpenApiOAuthFlow {
+          //      AuthorizationUrl = new Uri(oAuthUrl), // deine Auth-URL
+          //      Scopes = scopesWithLabels
+          //    }
+          //  }
+          //});
+
+          //// Security Requirement, damit Swagger UI die Authorisierung anfordert
+          //options.AddSecurityRequirement(
+          //  new OpenApiSecurityRequirement { {
+          //    new OpenApiSecurityScheme {
+          //      Reference = new OpenApiReference {
+          //        Type = ReferenceType.SecurityScheme,
+          //        Id = "oauth2"
+          //      },
+          //      Scheme = "oauth2",
+          //      Name = "Authorization", //ACHTUNG: Header-Value ist mit prefix "JWT <token>"
+          //      In = ParameterLocation.Header
+          //    },
+          //    splittedOAuthScopes.ToList()
+          //  }}
+          //);
+
+          options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme {
+            Type = SecuritySchemeType.OAuth2,
+            Flows = new OpenApiOAuthFlows {
+              Implicit = new OpenApiOAuthFlow {
+                AuthorizationUrl = new Uri(oAuthUrl),
+                Scopes = scopesWithLabels
+              }
+            }
+          });
+
+          options.AddSecurityRequirement(
+            (OpenApiDocument document) => {
+              OpenApiSecurityRequirement reqirementsDict = new();
+              reqirementsDict.Add(
+                new OpenApiSecuritySchemeReference("oauth2", document),
+                splittedOAuthScopes.ToList()
+              );
+              return reqirementsDict;
+            }
+          );
+
+        }
+
+        #endregion
+
+      }
 
       options.UseInlineDefinitionsForEnums();
 
@@ -308,9 +417,28 @@ namespace SmartStandards {
 
     private readonly IConfiguration _Configuration;
 
+    private readonly Func<string, KeyValuePair<string, AuthTokenConfig>[]> _AuthTokenConfigResolver;
+
     public SmartStandardsSwaggerStartupFilter(IApiDescriptionGroupCollectionProvider provider, IConfiguration configuration) {
       _Provider = provider;
       _Configuration = configuration;
+    }
+
+    /// <summary>
+    /// Creates a startup filter, which takes the Swagger UI OAuth settings (client id, PKCE)
+    /// from the AuthTokenConfigs delivered by the given resolver and replaces the
+    /// '{RequestBaseUrl}' placeholder within the security schemes per request.
+    /// </summary>
+    /// <param name="provider"></param>
+    /// <param name="configuration"></param>
+    /// <param name="authTokenConfigResolver">apiGroupName -> token source id + AuthTokenConfig</param>
+    public SmartStandardsSwaggerStartupFilter(
+      IApiDescriptionGroupCollectionProvider provider, IConfiguration configuration,
+      Func<string, KeyValuePair<string, AuthTokenConfig>[]> authTokenConfigResolver
+    ) {
+      _Provider = provider;
+      _Configuration = configuration;
+      _AuthTokenConfigResolver = authTokenConfigResolver;
     }
 
     public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) {
@@ -322,11 +450,34 @@ namespace SmartStandards {
           //warning: needs subfolder! jsons cant be within same dir as swaggerui (below)
           o.RouteTemplate = "docs/schema/{documentName}.{json|yaml}";
           //o.SerializeAsV2 = true;
+          if (_AuthTokenConfigResolver != null) {
+            o.PreSerializeFilters.Add(
+              (OpenApiDocument swaggerDoc, HttpRequest httpRequest) => {
+                SmartStandardsAuthTokenConfigDocumentFilter.ResolveRequestBaseUrlPlaceholders(swaggerDoc, httpRequest);
+              }
+            );
+          }
         });
 
         ApiDescriptionGroup[] groups = _Provider.ApiDescriptionGroups.Items.Where(
           g => !string.IsNullOrWhiteSpace(g.GroupName) && g.GroupName != "hidden"
         ).Distinct().ToArray();
+
+        SwaggerUIOptions swaggerUiOptions = null;
+        string initialOAuthClientId = null;
+        bool initialUsePkce = false;
+
+        if (_AuthTokenConfigResolver != null) {
+          // The resolver is NOT evaluated while the pipeline is built (avoids initialization order problems).
+          // Instead, the OAuth settings of the Swagger UI are refreshed whenever the UI is (re)loaded,
+          // because the SwaggerUIMiddleware serializes its options for each request of index.html / index.js.
+          app.Use((HttpContext httpContext, RequestDelegate nextMiddleware) => {
+            if (swaggerUiOptions != null && IsSwaggerUiIndexRequest(httpContext.Request)) {
+              this.RefreshSwaggerUiOAuthSettings(groups, swaggerUiOptions, initialOAuthClientId, initialUsePkce);
+            }
+            return nextMiddleware(httpContext);
+          });
+        }
 
         app.UseSwaggerUI(c => {
 
@@ -353,7 +504,13 @@ namespace SmartStandards {
 
           c.RoutePrefix = "docs";
 
-          if (!string.IsNullOrWhiteSpace(oAuthClientId)) {
+          if (_AuthTokenConfigResolver != null) {
+            // client id and PKCE are refreshed per UI (re)load (see above)
+            swaggerUiOptions = c;
+            initialOAuthClientId = c.OAuthConfigObject.ClientId;
+            initialUsePkce = c.OAuthConfigObject.UsePkceWithAuthorizationCodeGrant;
+          }
+          else if (!string.IsNullOrWhiteSpace(oAuthClientId)) {
             c.OAuthClientId(oAuthClientId);
           }
 
@@ -366,6 +523,306 @@ namespace SmartStandards {
         next(app);
       };
     }
+
+    /// <summary>
+    /// Returns true for the requests of the Swagger UI (RoutePrefix 'docs'), where the
+    /// SwaggerUIMiddleware serializes its options (index.html, index.js, redirect to index.html).
+    /// </summary>
+    private static bool IsSwaggerUiIndexRequest(HttpRequest request) {
+      PathString remainingPath;
+      if (!request.Path.StartsWithSegments("/docs", StringComparison.OrdinalIgnoreCase, out remainingPath)) {
+        return false;
+      }
+      string remaining = remainingPath.Value;
+      if (string.IsNullOrEmpty(remaining) || remaining == "/") {
+        return true;
+      }
+      if (string.Equals(remaining, "/index.html", StringComparison.OrdinalIgnoreCase)) {
+        return true;
+      }
+      if (string.Equals(remaining, "/index.js", StringComparison.OrdinalIgnoreCase)) {
+        return true;
+      }
+      return false;
+    }
+
+    /// <summary>
+    /// Re-evaluates the resolver and applies the (single, global) OAuth client id and the PKCE flag
+    /// to the options of the Swagger UI. Without any OAuth config, the initial values are restored.
+    /// </summary>
+    private void RefreshSwaggerUiOAuthSettings(
+      ApiDescriptionGroup[] groups, SwaggerUIOptions swaggerUiOptions, string initialClientId, bool initialUsePkce
+    ) {
+      string clientId;
+      bool usePkce;
+      this.EvaluateSwaggerUiOAuthSettings(groups, out clientId, out usePkce);
+      // Swagger UI supports only one global client id (first one wins)
+      if (string.IsNullOrWhiteSpace(clientId)) {
+        swaggerUiOptions.OAuthConfigObject.ClientId = initialClientId;
+      }
+      else {
+        swaggerUiOptions.OAuthConfigObject.ClientId = clientId;
+      }
+      if (usePkce) {
+        swaggerUiOptions.OAuthConfigObject.UsePkceWithAuthorizationCodeGrant = true;
+      }
+      else {
+        swaggerUiOptions.OAuthConfigObject.UsePkceWithAuthorizationCodeGrant = initialUsePkce;
+      }
+    }
+
+    /// <summary>
+    /// Evaluates the AuthTokenConfigs of all given API groups to determine the (single, global)
+    /// OAuth client id for the Swagger UI and whether PKCE has to be used (any code flow present).
+    /// </summary>
+    private void EvaluateSwaggerUiOAuthSettings(ApiDescriptionGroup[] groups, out string clientId, out bool usePkce) {
+      clientId = null;
+      usePkce = false;
+      foreach (ApiDescriptionGroup group in groups) {
+        KeyValuePair<string, AuthTokenConfig>[] tokenSources = _AuthTokenConfigResolver.Invoke(group.GroupName);
+        if (tokenSources == null) {
+          continue;
+        }
+        foreach (KeyValuePair<string, AuthTokenConfig> tokenSource in tokenSources) {
+          AuthTokenConfig config = tokenSource.Value;
+          if (config == null) {
+            continue;
+          }
+          bool isCodeFlow = SmartStandardsAuthTokenConfigDocumentFilter.IsCodeFlow(config);
+          bool isImplicitFlow = SmartStandardsAuthTokenConfigDocumentFilter.IsImplicitFlow(config);
+          if (isCodeFlow) {
+            usePkce = true;
+          }
+          if ((isCodeFlow || isImplicitFlow) && clientId == null && !string.IsNullOrWhiteSpace(config.ClientId)) {
+            clientId = config.ClientId;
+          }
+        }
+      }
+    }
+
+  }
+
+  /// <summary>
+  /// Emits one security scheme per token source (scheme name = token source id) plus one security
+  /// requirement per token source (alternatives) into the document of an API group.
+  /// The document name is used as API group name for the resolver.
+  /// </summary>
+  public sealed partial class SmartStandardsAuthTokenConfigDocumentFilter : IDocumentFilter {
+
+    /// <summary>
+    /// Official placeholder convention (see AuthTokenHandling): will be replaced per request
+    /// with the base URL of the request (scheme://host[:port] plus path base, without trailing slash).
+    /// </summary>
+    public const string RequestBaseUrlPlaceholder = "{RequestBaseUrl}";
+
+    private readonly Func<string, KeyValuePair<string, AuthTokenConfig>[]> _AuthTokenConfigResolver;
+
+    public SmartStandardsAuthTokenConfigDocumentFilter(Func<string, KeyValuePair<string, AuthTokenConfig>[]> authTokenConfigResolver) {
+      if (authTokenConfigResolver == null) {
+        throw new ArgumentNullException(nameof(authTokenConfigResolver));
+      }
+      _AuthTokenConfigResolver = authTokenConfigResolver;
+    }
+
+    /// <summary>
+    /// Adds the security schemes and requirements for the API group represented by the document.
+    /// </summary>
+    public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context) {
+
+      KeyValuePair<string, AuthTokenConfig>[] tokenSources = _AuthTokenConfigResolver.Invoke(context.DocumentName);
+      if (tokenSources == null || tokenSources.Length == 0) {
+        return;
+      }
+
+      if (swaggerDoc.Security == null) {
+        swaggerDoc.Security = new List<OpenApiSecurityRequirement>();
+      }
+
+      HashSet<string> processedTokenSourceIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+      foreach (KeyValuePair<string, AuthTokenConfig> tokenSource in tokenSources) {
+
+        string tokenSourceId = tokenSource.Key;
+        if (string.IsNullOrWhiteSpace(tokenSourceId)) {
+          throw new InvalidOperationException(
+            $"The AuthTokenConfig resolver returned an empty token source id for API group '{context.DocumentName}'."
+          );
+        }
+        if (tokenSource.Value == null) {
+          throw new InvalidOperationException(
+            $"The AuthTokenConfig resolver returned no config for token source '{tokenSourceId}' (API group '{context.DocumentName}')."
+          );
+        }
+        if (!processedTokenSourceIds.Add(tokenSourceId)) {
+          continue;
+        }
+
+        OpenApiSecurityScheme securityScheme = CreateSecurityScheme(tokenSourceId, tokenSource.Value);
+        swaggerDoc.AddComponent<IOpenApiSecurityScheme>(tokenSourceId, securityScheme);
+
+        // each requirement is an alternative: the Swagger UI offers all token sources
+        // (OpenAPI 3.0: scopes are only allowed for OAuth2 schemes)
+        List<string> requiredScopes = new List<string>();
+        if (securityScheme.Type == SecuritySchemeType.OAuth2) {
+          requiredScopes.AddRange(GetScopes(tokenSource.Value));
+        }
+        OpenApiSecurityRequirement requirement = new OpenApiSecurityRequirement();
+        requirement.Add(new OpenApiSecuritySchemeReference(tokenSourceId, swaggerDoc), requiredScopes);
+        swaggerDoc.Security.Add(requirement);
+
+      }
+    }
+
+    /// <summary>
+    /// Maps the IssueMode of an AuthTokenConfig to an OpenAPI security scheme:
+    /// OAuth code flow -> 'authorizationCode', implicit flow -> 'implicit', other modes -> Bearer input.
+    /// </summary>
+    internal static OpenApiSecurityScheme CreateSecurityScheme(string tokenSourceId, AuthTokenConfig config) {
+
+      if (IsCodeFlow(config)) {
+        RequireUrl(tokenSourceId, nameof(AuthTokenConfig.AuthEndpointUrl), config.AuthEndpointUrl);
+        RequireUrl(tokenSourceId, nameof(AuthTokenConfig.RetrieveEndpointUrl), config.RetrieveEndpointUrl);
+        return new OpenApiSecurityScheme {
+          Type = SecuritySchemeType.OAuth2,
+          Description = config.DisplayLabel,
+          Flows = new OpenApiOAuthFlows {
+            AuthorizationCode = new OpenApiOAuthFlow {
+              AuthorizationUrl = new Uri(config.AuthEndpointUrl, UriKind.RelativeOrAbsolute),
+              TokenUrl = new Uri(config.RetrieveEndpointUrl, UriKind.RelativeOrAbsolute),
+              Scopes = CreateScopesWithLabels(config)
+            }
+          }
+        };
+      }
+
+      if (IsImplicitFlow(config)) {
+        RequireUrl(tokenSourceId, nameof(AuthTokenConfig.AuthEndpointUrl), config.AuthEndpointUrl);
+        return new OpenApiSecurityScheme {
+          Type = SecuritySchemeType.OAuth2,
+          Description = config.DisplayLabel,
+          Flows = new OpenApiOAuthFlows {
+            Implicit = new OpenApiOAuthFlow {
+              AuthorizationUrl = new Uri(config.AuthEndpointUrl, UriKind.RelativeOrAbsolute),
+              Scopes = CreateScopesWithLabels(config)
+            }
+          }
+        };
+      }
+
+      return new OpenApiSecurityScheme {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        Description = config.DisplayLabel
+      };
+    }
+
+    /// <summary>
+    /// Returns the scopes transported within the AuthTokenConfig: the value of the claim 'scope'
+    /// (Claims dictionary), split by blank. Never null.
+    /// </summary>
+    internal static string[] GetScopes(AuthTokenConfig config) {
+      if (config.Claims == null) {
+        return Array.Empty<string>();
+      }
+      string scopeExpression;
+      if (!config.Claims.TryGetValue("scope", out scopeExpression) || scopeExpression == null) {
+        return Array.Empty<string>();
+      }
+      return scopeExpression.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct(StringComparer.Ordinal).ToArray();
+    }
+
+    /// <summary>
+    /// Creates the scope dictionary (scope -> label) for an OAuth flow of the given AuthTokenConfig.
+    /// </summary>
+    private static Dictionary<string, string> CreateScopesWithLabels(AuthTokenConfig config) {
+      Dictionary<string, string> scopesWithLabels = new Dictionary<string, string>();
+      foreach (string scope in GetScopes(config)) {
+        scopesWithLabels[scope] = $"Scope: {scope}";
+      }
+      return scopesWithLabels;
+    }
+
+    /// <summary>
+    /// Returns true, if the IssueMode of the config represents the OAuth code flow.
+    /// </summary>
+    internal static bool IsCodeFlow(AuthTokenConfig config) {
+      if (string.Equals(config.IssueMode, WellknownIssuingModes.OAUTH_CIBA_CODEGRAND, StringComparison.OrdinalIgnoreCase)) {
+        return true;
+      }
+      if (string.Equals(config.IssueMode, WellknownIssuingModes.OAUTH_CIBA_CODEGRAND_HTTPGETONLY, StringComparison.OrdinalIgnoreCase)) {
+        return true;
+      }
+      return false;
+    }
+
+    /// <summary>
+    /// Returns true, if the IssueMode of the config represents the (legacy) OAuth implicit flow.
+    /// </summary>
+    internal static bool IsImplicitFlow(AuthTokenConfig config) {
+      return string.Equals(config.IssueMode, WellknownIssuingModes.OAUTH_IMPLICIT_FLOW, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Throws a clear exception, if a URL required for the OpenAPI flow is missing.
+    /// </summary>
+    private static void RequireUrl(string tokenSourceId, string propertyName, string url) {
+      if (string.IsNullOrWhiteSpace(url)) {
+        throw new InvalidOperationException(
+          $"The AuthTokenConfig of token source '{tokenSourceId}' requires '{propertyName}' for its IssueMode."
+        );
+      }
+    }
+
+    /// <summary>
+    /// Replaces the '{RequestBaseUrl}' placeholder within all OAuth flow URLs of the document
+    /// with the base URL of the given request (scheme://host[:port] plus path base, without trailing slash).
+    /// </summary>
+    public static void ResolveRequestBaseUrlPlaceholders(OpenApiDocument swaggerDoc, HttpRequest httpRequest) {
+
+      if (swaggerDoc.Components == null || swaggerDoc.Components.SecuritySchemes == null) {
+        return;
+      }
+
+      string requestBaseUrl = (
+        httpRequest.Scheme + "://" + httpRequest.Host.ToUriComponent() + httpRequest.PathBase.ToUriComponent()
+      ).TrimEnd('/');
+
+      foreach (IOpenApiSecurityScheme securityScheme in swaggerDoc.Components.SecuritySchemes.Values) {
+        if (securityScheme == null || securityScheme.Flows == null) {
+          continue;
+        }
+        ResolveRequestBaseUrlPlaceholders(securityScheme.Flows.Implicit, requestBaseUrl);
+        ResolveRequestBaseUrlPlaceholders(securityScheme.Flows.AuthorizationCode, requestBaseUrl);
+        ResolveRequestBaseUrlPlaceholders(securityScheme.Flows.Password, requestBaseUrl);
+        ResolveRequestBaseUrlPlaceholders(securityScheme.Flows.ClientCredentials, requestBaseUrl);
+      }
+    }
+
+    /// <summary>
+    /// Replaces the '{RequestBaseUrl}' placeholder within the URLs of one OAuth flow.
+    /// </summary>
+    private static void ResolveRequestBaseUrlPlaceholders(OpenApiOAuthFlow flow, string requestBaseUrl) {
+      if (flow == null) {
+        return;
+      }
+      flow.AuthorizationUrl = ResolveRequestBaseUrlPlaceholder(flow.AuthorizationUrl, requestBaseUrl);
+      flow.TokenUrl = ResolveRequestBaseUrlPlaceholder(flow.TokenUrl, requestBaseUrl);
+      flow.RefreshUrl = ResolveRequestBaseUrlPlaceholder(flow.RefreshUrl, requestBaseUrl);
+    }
+
+    /// <summary>
+    /// Plain, case-sensitive replacement of every occurrence of '{RequestBaseUrl}'.
+    /// </summary>
+    private static Uri ResolveRequestBaseUrlPlaceholder(Uri url, string requestBaseUrl) {
+      if (url == null) {
+        return null;
+      }
+      if (!url.OriginalString.Contains(RequestBaseUrlPlaceholder, StringComparison.Ordinal)) {
+        return url;
+      }
+      string resolvedUrl = url.OriginalString.Replace(RequestBaseUrlPlaceholder, requestBaseUrl, StringComparison.Ordinal);
+      return new Uri(resolvedUrl, UriKind.RelativeOrAbsolute);
+    }
+
   }
 
 
