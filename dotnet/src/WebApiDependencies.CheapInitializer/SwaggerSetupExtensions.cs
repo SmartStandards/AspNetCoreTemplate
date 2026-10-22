@@ -466,6 +466,7 @@ namespace SmartStandards {
         SwaggerUIOptions swaggerUiOptions = null;
         string initialOAuthClientId = null;
         bool initialUsePkce = false;
+        IEnumerable<string> initialOAuthScopes = null;
 
         if (_AuthTokenConfigResolver != null) {
           // The resolver is NOT evaluated while the pipeline is built (avoids initialization order problems).
@@ -473,7 +474,7 @@ namespace SmartStandards {
           // because the SwaggerUIMiddleware serializes its options for each request of index.html / index.js.
           app.Use((HttpContext httpContext, RequestDelegate nextMiddleware) => {
             if (swaggerUiOptions != null && IsSwaggerUiIndexRequest(httpContext.Request)) {
-              this.RefreshSwaggerUiOAuthSettings(groups, swaggerUiOptions, initialOAuthClientId, initialUsePkce);
+              this.RefreshSwaggerUiOAuthSettings(groups, swaggerUiOptions, initialOAuthClientId, initialUsePkce, initialOAuthScopes);
             }
             return nextMiddleware(httpContext);
           });
@@ -505,10 +506,11 @@ namespace SmartStandards {
           c.RoutePrefix = "docs";
 
           if (_AuthTokenConfigResolver != null) {
-            // client id and PKCE are refreshed per UI (re)load (see above)
+            // client id, PKCE and preselected scopes are refreshed per UI (re)load (see above)
             swaggerUiOptions = c;
             initialOAuthClientId = c.OAuthConfigObject.ClientId;
             initialUsePkce = c.OAuthConfigObject.UsePkceWithAuthorizationCodeGrant;
+            initialOAuthScopes = c.OAuthConfigObject.Scopes;
           }
           else if (!string.IsNullOrWhiteSpace(oAuthClientId)) {
             c.OAuthClientId(oAuthClientId);
@@ -547,15 +549,25 @@ namespace SmartStandards {
     }
 
     /// <summary>
-    /// Re-evaluates the resolver and applies the (single, global) OAuth client id and the PKCE flag
-    /// to the options of the Swagger UI. Without any OAuth config, the initial values are restored.
+    /// Re-evaluates the resolver and applies the (single, global) OAuth client id, the PKCE flag and the
+    /// preselected scopes (all scopes of all OAuth token sources) to the options of the Swagger UI.
+    /// Without any OAuth config, the initial values are restored.
     /// </summary>
     private void RefreshSwaggerUiOAuthSettings(
-      ApiDescriptionGroup[] groups, SwaggerUIOptions swaggerUiOptions, string initialClientId, bool initialUsePkce
+      ApiDescriptionGroup[] groups, SwaggerUIOptions swaggerUiOptions, string initialClientId, bool initialUsePkce,
+      IEnumerable<string> initialScopes
     ) {
       string clientId;
       bool usePkce;
-      this.EvaluateSwaggerUiOAuthSettings(groups, out clientId, out usePkce);
+      string[] scopes;
+      this.EvaluateSwaggerUiOAuthSettings(groups, out clientId, out usePkce, out scopes);
+      // the Swagger UI preselects these scopes within the 'Authorize' dialog
+      if (scopes.Length > 0) {
+        swaggerUiOptions.OAuthConfigObject.Scopes = scopes;
+      }
+      else {
+        swaggerUiOptions.OAuthConfigObject.Scopes = initialScopes;
+      }
       // Swagger UI supports only one global client id (first one wins)
       if (string.IsNullOrWhiteSpace(clientId)) {
         swaggerUiOptions.OAuthConfigObject.ClientId = initialClientId;
@@ -573,11 +585,15 @@ namespace SmartStandards {
 
     /// <summary>
     /// Evaluates the AuthTokenConfigs of all given API groups to determine the (single, global)
-    /// OAuth client id for the Swagger UI and whether PKCE has to be used (any code flow present).
+    /// OAuth client id for the Swagger UI, whether PKCE has to be used (any code flow present)
+    /// and the scopes to preselect (all scopes of all OAuth token sources, never null).
     /// </summary>
-    private void EvaluateSwaggerUiOAuthSettings(ApiDescriptionGroup[] groups, out string clientId, out bool usePkce) {
+    private void EvaluateSwaggerUiOAuthSettings(
+      ApiDescriptionGroup[] groups, out string clientId, out bool usePkce, out string[] scopes
+    ) {
       clientId = null;
       usePkce = false;
+      List<string> collectedScopes = new List<string>();
       foreach (ApiDescriptionGroup group in groups) {
         KeyValuePair<string, AuthTokenConfig>[] tokenSources = _AuthTokenConfigResolver.Invoke(group.GroupName);
         if (tokenSources == null) {
@@ -596,8 +612,16 @@ namespace SmartStandards {
           if ((isCodeFlow || isImplicitFlow) && clientId == null && !string.IsNullOrWhiteSpace(config.ClientId)) {
             clientId = config.ClientId;
           }
+          if (isCodeFlow || isImplicitFlow) {
+            foreach (string scope in SmartStandardsAuthTokenConfigDocumentFilter.GetScopes(config)) {
+              if (!collectedScopes.Contains(scope)) {
+                collectedScopes.Add(scope);
+              }
+            }
+          }
         }
       }
+      scopes = collectedScopes.ToArray();
     }
 
   }
@@ -683,7 +707,7 @@ namespace SmartStandards {
         RequireUrl(tokenSourceId, nameof(AuthTokenConfig.RetrieveEndpointUrl), config.RetrieveEndpointUrl);
         return new OpenApiSecurityScheme {
           Type = SecuritySchemeType.OAuth2,
-          Description = config.DisplayLabel,
+          Description = CreateCodeFlowDescription(config),
           Flows = new OpenApiOAuthFlows {
             AuthorizationCode = new OpenApiOAuthFlow {
               AuthorizationUrl = new Uri(config.AuthEndpointUrl, UriKind.RelativeOrAbsolute),
@@ -713,6 +737,22 @@ namespace SmartStandards {
         Scheme = "bearer",
         Description = config.DisplayLabel
       };
+    }
+
+    /// <summary>
+    /// Creates the description of a code flow security scheme (shown within the 'Authorize' dialog of the Swagger UI).
+    /// For public clients (client id given, PKCE is used) a hint is appended, because the Swagger UI always
+    /// renders a 'client_secret' input field, which is confusing when no secret exists.
+    /// </summary>
+    private static string CreateCodeFlowDescription(AuthTokenConfig config) {
+      if (string.IsNullOrWhiteSpace(config.ClientId)) {
+        return config.DisplayLabel;
+      }
+      string hint = "**Public client (PKCE):** the `client_id` is prefilled and no `client_secret` is required - just leave it empty.";
+      if (string.IsNullOrWhiteSpace(config.DisplayLabel)) {
+        return hint;
+      }
+      return config.DisplayLabel + "\n\n" + hint;
     }
 
     /// <summary>
