@@ -13,10 +13,10 @@
     <Product>SmartStandards.WebApiDependencies</Product>
     <Company>(public domain)</Company>
     <Copyright>SmartStandards</Copyright>
-    <Version>10.0.16</Version>
-    <AssemblyVersion>10.0.16</AssemblyVersion>
+    <Version>10.0.17</Version>
+    <AssemblyVersion>10.0.17</AssemblyVersion>
     <Authors>SmartStandards</Authors>
-    <FileVersion>10.0.16</FileVersion>
+    <FileVersion>10.0.17</FileVersion>
     <PackageTags>AspNetCore Dependencies CheapInitializer</PackageTags>
     <PackageProjectUrl>https://github.com/SmartStandards/AspNetCoreTemplate</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SmartStandards/AspNetCoreTemplate</RepositoryUrl>
