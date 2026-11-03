@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>SmartStandards.WebApiDependencies.net10.0</id>
-    <version>10.0.18</version>
+    <version>10.0.19</version>
     <title>SmartStandards WebApiDependencies (ASP.NET Core + common SmartStandards packages)</title>
     <authors>SmartStandards</authors>
     <owners>(public domain)</owners>
@@ -23,7 +23,7 @@
 
         <!-- regarding any Microsoft packages, we rely on the base reference package... -->
         
-        <dependency id="SmartStandards.WebApiDependencies.AspNetCore.net10.0" version="[10.0.18]" />
+        <dependency id="SmartStandards.WebApiDependencies.AspNetCore.net10.0" version="[10.0.19]" />
       
         <!-- ...and extend these here with the state-of-the-art packages from the 'SmartStandards' ecosystem -->
 
@@ -36,8 +36,8 @@
         <dependency id="SmartStandards.Logging.AspSupport" version="3.4.4" />
         <dependency id="SmartStandards.Logging.Centralized" version="3.3.1" />
         
-        <dependency id="UJMW.DynamicController" version="5.6.3" />
-        <dependency id="UJMW.DynamicClient" version="5.6.3" />
+        <dependency id="UJMW.DynamicController" version="5.7.4" />
+        <dependency id="UJMW.DynamicClient" version="5.7.4" />
         
         <dependency id="SmartStandards.AuthTokenHandling" version="6.0.6" />
         <dependency id="SmartStandards.AuthTokenHandling.MvcSupport" version="6.0.6" />
