@@ -45,7 +45,7 @@
 
     <!-- additional packages which are note implicitely provided by 'Microsoft.AspNetCore.App' -->
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="10.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="10.0.14" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.8" />
 
     <!-- intermediate (until we've completely switched to 'Microsoft.AspNetCore.OpenApi' -->
@@ -85,8 +85,8 @@
     <PackageReference Include="SmartStandards.AuthTokenHandling" Version="6.0.6" />
     <PackageReference Include="SmartStandards.AuthTokenHandling.MvcSupport" Version="6.0.6" />
 
-    <PackageReference Include="SmartAmbience" Version="3.2.1" />
-    <PackageReference Include="SmartAmbience.MvcSupport" Version="3.2.1" />
+    <PackageReference Include="SmartAmbience" Version="3.2.2" />
+    <PackageReference Include="SmartAmbience.MvcSupport" Version="3.2.2" />
 
     <PackageReference Include="SmartStandards.Essentials" Version="1.0.1" />
 

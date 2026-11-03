@@ -47,7 +47,7 @@
     <!--<PackageReference Include="SmartStandards.WebApiDependencies.AspNetCore.net10.0" Version="10.0.0" />-->
     <!-- TODO: COMMENT THIS IN ^^^^^^ - after ProjectReference to 'WebApiDependencies.CheapInitializer' was removed!!! -->
     
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.14" />
 
     <PackageReference Include="UJMW.DynamicClient" Version="5.7.4" />
     <PackageReference Include="UJMW.DynamicController" Version="5.7.4" />
@@ -55,8 +55,8 @@
     <PackageReference Include="SmartStandards.AuthTokenHandling" Version="6.0.6" />
     <PackageReference Include="SmartStandards.AuthTokenHandling.MvcSupport" Version="6.0.6" />
 
-    <PackageReference Include="SmartAmbience" Version="3.2.1" />
-    <PackageReference Include="SmartAmbience.MvcSupport" Version="3.2.1" />
+    <PackageReference Include="SmartAmbience" Version="3.2.2" />
+    <PackageReference Include="SmartAmbience.MvcSupport" Version="3.2.2" />
 
     <PackageReference Include="SmartStandards.Essentials" Version="1.0.1" />
 
