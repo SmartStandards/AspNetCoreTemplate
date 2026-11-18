@@ -1,6 +1,6 @@
 ---
 name: most-important-details-for-smartstandards-aspnetcore-template
-description: Mandatory compact entry skill for SmartStandards.AspNetCoreTemplate and its package SmartStandards.WebApiDependencies (.NET 10) - Program.Main startup pattern, LaunchProfileHelper (applying a launchSettings.json profile when an EXE is started directly with "LaunchProfile=<name>"), branch-specific appsettings files, and the SmartStandardsCheapInitializer. Use before changing code in this repository, and when writing or debugging Program.Main of a SmartStandards-style ASP.NET Core Web API, when a service behaves differently started from Visual Studio vs. as EXE (e.g. falls back to port 5000), or when appsettings.<Branch>.json files are involved.
+description: Mandatory compact entry skill for SmartStandards.AspNetCoreTemplate and its package SmartStandards.WebApiDependencies (.NET 10) - Program.Main startup pattern, LaunchProfileHelper (applying a launchSettings.json profile when an EXE is started directly with "LaunchProfile=<name>"), branch-specific appsettings files, and the SmartStandardsCheapInitializer. Use before changing code in this repository, and when writing or debugging Program.Main of a SmartStandards-style ASP.NET Core Web API, when a service behaves differently started from Visual Studio vs. as EXE (e.g. falls back to port 5000), when appsettings.<Branch>.json files are involved, or when hosting an ASP.NET Core application in-memory inside WebView2 desktop windows (WebView2Template / WebViewAspNetCoreAdapter).
 ---
 
 # Most important details for SmartStandards.AspNetCoreTemplate
@@ -110,10 +110,27 @@ Two overloads; details and requirements in `doc/Swagger-Security-per-ApiGroup.md
   schemes; Bearer schemes get no scopes (OpenAPI 3.0). Values are used literally (no prefix handling, no
   placeholder resolution).
 
+## WebView2Template: In-Memory Hosting in a Desktop Window
+
+`dotnet/src/WebView2Template/WebViewAspNetCoreAdapter.cs` (embedded into consumers via `WebViewAspNetCoreAdapter.tt`, see `dotnet-t4-source-embedding`) runs a complete ASP.NET Core pipeline in-memory (`UseTestServer`) and serves it to one or more WebView2 controls under a base address (default custom scheme `app://local`). The same application (hooks `OnConfigureServices` / `OnRunApplication`) can therefore be hosted as a web service and as a desktop application. Verified against the source (2026-11-18, no runtime test of the points below).
+
+Behavior that shapes the application design:
+
+- **No network port.** The pipeline is only reachable from the attached WebViews. Other devices (e.g. tablets) need a separate Kestrel host; if a process runs both, create shared application singletons (engines, sockets, files) once in the host process and register them as instances in both hosts, never via DI factories per host.
+- **No WebSockets.** Requests travel through `CoreWebView2.WebResourceRequested`, which does not carry WebSocket upgrades. SignalR degrades to long polling there.
+- **Requests are dispatched on the UI thread.** Each request is handed to the parent form via `Invoke` and waited for with an `Application.DoEvents()` loop. Long-running or long-polling requests therefore keep the UI thread busy; prefer short polling. Code running inside the pipeline (thread pool) must marshal UI work with `BeginInvoke`, never with a blocking `Invoke`.
+- **Server push into the page** is possible natively: `CoreWebView2.PostWebMessageAsJson` from the host, received in the page via `window.chrome.webview.addEventListener("message", ...)`; the page talks back with `window.chrome.webview.postMessage(...)` (`WebMessageReceived`).
+- **`window.open` is swallowed** (`_ForceKeepingOriginalWindow = true`): the target URL is navigated in the same WebView. Additional windows must be opened natively by the host (new form + WebView2 + `Attach`).
+- **Default context menus are enabled** by `ConfigureNewWindow`. Applications using the right mouse button (custom context menus, 3D navigation) set `CoreWebView2.Settings.AreDefaultContextMenusEnabled = false` after `Attach` (in their own `CoreWebView2InitializationCompleted` handler, registered after calling `Attach`, so it runs after the adapter's handler).
+- **`Attach` resolves the parent form** with `FindForm()`: call it after the WebView2 control has been added to its form (e.g. in `Form.Load`).
+- **Custom scheme and scripts:** classic (non-module) scripts are the safest choice under the custom scheme; bundlers can emit a single IIFE bundle loaded with `defer`. Redirects under custom schemes are followed manually by the adapter.
+- Several WebViews (windows) can be attached to one adapter; they share one WebView2 environment folder (`%LOCALAPPDATA%\<assembly>\WebView2Env`).
+
 ## Known Pitfalls
 
 - `CreateForCurrentLaunchsettingsJson(throwIfNotFound: false)` still throws when no file is found, because the internal lookup `TryFindLaunchSettingsFile` throws instead of returning `false`. This also affects `UseUrlsFromLaunchProfileIfRequested`. Known defect in 10.0.14; fix it here, do not work around it in consuming code.
 - The helper writes probe paths to the console during lookup.
+- WebView2Template: no WebSockets, UI-thread request dispatch, swallowed `window.open`, enabled default context menus - see the WebView2Template section.
 
 ## Related Skills
 
