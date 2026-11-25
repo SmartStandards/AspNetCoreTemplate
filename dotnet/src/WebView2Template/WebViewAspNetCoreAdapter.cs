@@ -373,101 +373,129 @@ namespace TemplateNamespace {
       DevLogger.LogTrace($"Navigating to: {e.Uri}");  
     }
 
-    private void OnWebResourceRequested(object sender, CoreWebView2WebResourceRequestedEventArgs e) {
+    // WebView2 raises this event on the UI thread (WindowsFormsSynchronizationContext), so every 'await'
+    // resumes there and all CoreWebView2 objects are touched on the UI thread only. The ASP.NET pipeline
+    // (TestServer) runs on the thread pool. No Invoke and no Application.DoEvents(): pumping messages while
+    // waiting nested the requests into each other (hanging responses up to a StackOverflowException).
+    // 'async void' is required by the event signature, therefore NOTHING may escape this method.
+    private async void OnWebResourceRequested(object sender, CoreWebView2WebResourceRequestedEventArgs e) {
       CoreWebView2 coreWebView = (CoreWebView2)sender;
+      CoreWebView2Deferral deferral = null;
+      HttpRequestMessage requestMessage = null;
+      Uri redirectUri = null;
 
-      DevLogger.LogTrace($"{DateTime.Now.Second} OnWebResourceRequested: {e.Request.Uri}");
+      try {
 
-      System.Windows.Forms.Form parentForm = null;
-      lock (_FormsPerCoreWebview) {
-        _FormsPerCoreWebview.TryGetValue(coreWebView, out parentForm);
+        DevLogger.LogTrace($"{DateTime.Now.Second} OnWebResourceRequested: {e.Request.Uri}");
+
+        deferral = e.GetDeferral();
+
+        //ACHTUNG: stream des WebViewRequest muss komplett gepuffert werden bevor wir ihn in die asp-engine leiten, sonst friert alles ein!
+        requestMessage = this.CreateBufferedRequestMessage(e.Request);
+
+        Func<HttpClient> httpClientFactory = await this.WaitForHttpClientFactoryAsync();
+
+        HttpResponseMessage responseMessage;
+        byte[] responseBody;
+        using (HttpClient client = httpClientFactory()) {
+          DevLogger.LogTrace($"{DateTime.Now.Second} REQUEST (SendAsync): {requestMessage.RequestUri}");
+          responseMessage = await client.SendAsync(requestMessage);
+
+          //ACHTUNG: auch die Response komplett puffern - WebView2 liest den Stream synchron (UI-Thread)!
+          responseBody = await responseMessage.Content.ReadAsByteArrayAsync();
+        }
+        DevLogger.LogTrace($"{DateTime.Now.Second} RESPONSE '{responseMessage.ReasonPhrase}' from: {requestMessage.RequestUri}");
+
+        string responseHeaders = this.BuildResponseHeaderString(responseMessage);
+
+        e.Response = coreWebView.Environment.CreateWebResourceResponse(
+          new MemoryStream(responseBody),
+          (int)responseMessage.StatusCode,
+          responseMessage.ReasonPhrase,
+          responseHeaders
+        );
+
+        if (_BaseAddressHasCustomScheme && _RedirectStatusCodes.Contains((int)responseMessage.StatusCode)) {
+          //when using custom schemes (like 'app:') we need to handle redirects manually,
+          //because WebView2 only supports this for http/https schemes...
+          redirectUri = responseMessage.Headers.Location;
+          if (redirectUri != null && !redirectUri.IsAbsoluteUri) {
+            redirectUri = new Uri(requestMessage.RequestUri, redirectUri);
+          }
+        }
+
+      }
+      catch (Exception ex) {
+        DevLogger.LogError(ex);
+        this.TrySetErrorResponse(coreWebView, e, ex);
+      }
+      finally {
+        if (deferral != null) {
+          try {
+            DevLogger.LogTrace($"{DateTime.Now.Second} deferral.Complete()");
+            deferral.Complete();
+          }
+          catch (Exception ex) {
+            //the WebView (window) is already gone
+            DevLogger.LogTrace($"deferral.Complete() failed: {ex.Message}");
+          }
+        }
       }
 
-      //ACHTUNG: stream des WebViewRequest muss komplett gepuffert werden bevor wir ihn in die asp-engine leiten, sonst friert alles ein!
-      HttpRequestMessage requestMessage = this.CreateBufferedRequestMessage(e.Request);
-      CoreWebView2Deferral deferral = e.GetDeferral();
-  
-      Action requestProxyMethod = () => {
+      if (redirectUri != null) {
         try {
-
-          Task<HttpResponseMessage> responseAwaitingTaks;
-
-          DevLogger.LogTrace($"{DateTime.Now.Second} GetTestClient()");
-          using (HttpClient client = _HttpClientFactory()) {
-
-            //Task<HttpResponseMessage> responseAwaitingTaks = this._HttpClient.SendAsync(requestMessage);
-            DevLogger.LogTrace($"{DateTime.Now.Second} REQUEST (SendAsync): {requestMessage.RequestUri}");
-            responseAwaitingTaks = _Host.GetTestClient().SendAsync(requestMessage);
-
-            while (!responseAwaitingTaks.IsCompleted) {
-              Application.DoEvents();
-              Thread.Sleep(1);
-            }
-
-          }
-
-          HttpResponseMessage responseMessage = responseAwaitingTaks.Result;
-          DevLogger.LogTrace($"{DateTime.Now.Second} RESPONSE '{responseMessage.ReasonPhrase}' from: {requestMessage.RequestUri}");
-
-          int statusCode = (int)responseMessage.StatusCode;
-
-          Stream responseStream = responseMessage.Content.ReadAsStream();
-          string responseHeaders = this.BuildResponseHeaderString(responseMessage);
-
-          e.Response = coreWebView.Environment.CreateWebResourceResponse(
-            responseStream,
-            (int)responseMessage.StatusCode,
-            responseMessage.ReasonPhrase,
-            responseHeaders
-          );
-
-          DevLogger.LogTrace($"{DateTime.Now.Second} deferral.Complete()");
-          deferral.Complete();
-
-          if (_BaseAddressHasCustomScheme && _RedirectStatusCodes.Contains((int)responseMessage.StatusCode)) {
-            //when using custom schemes (like 'app:') we need to handle redirects manually,
-            //because WebView2 only supports this for http/https schemes...
-
-            Uri redirectUri = responseMessage.Headers.Location;
-
-            if (!redirectUri.IsAbsoluteUri) {
-              redirectUri = new Uri(requestMessage.RequestUri, redirectUri);
-            }
-            string browserRedirectUri = redirectUri.AbsoluteUri;
-            DevLogger.LogTrace($"Manually processing internal Redirect to: {browserRedirectUri}");
-            coreWebView.Navigate(browserRedirectUri);
-
-          }
-
+          string browserRedirectUri = redirectUri.AbsoluteUri;
+          DevLogger.LogTrace($"Manually processing internal Redirect to: {browserRedirectUri}");
+          coreWebView.Navigate(browserRedirectUri);
         }
         catch (Exception ex) {
           DevLogger.LogError(ex);
-
-          string errorMessage = $"Internal Server Error";
-
-          //UNSAFE
-          errorMessage = ex.Message;
-
-          string errorPageHtml = $"<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Error</title><body style=\"margin:0;min-height:100vh;background:#8b0000;font-family:Consolas,Monaco,'Courier New',monospace;color:#220;display:flex;align-items:center;justify-content:flex-start;padding:4rem\"><main style=\"width:min(1100px,calc(100vw - 8rem));background:#fff5f5;border-radius:18px;box-shadow:0 24px 80px #0006;padding:2rem;text-align:left;white-space:pre-wrap;overflow:auto\"><h1 style=\"margin:0 0 1rem;color:#8b0000;font-size:1.6rem\">Error</h1><pre style=\"margin:0;font:inherit;line-height:1.0;font-size:0.8rem\"><b>{ex.GetType().Name}</b>: {ex.Message}<br>\r\n<i>{ex.StackTrace.Replace(" in ", Environment.NewLine + "in ").Replace(Environment.NewLine, "<br>\r\n").TrimStart()}</i></pre></main></body></html>";
-
-          byte[] errorBytes = Encoding.UTF8.GetBytes(errorPageHtml);
-          MemoryStream errorStream = new MemoryStream(errorBytes);
-
-          e.Response = coreWebView.Environment.CreateWebResourceResponse(
-            errorStream,
-            500,
-            errorMessage,
-            "Content-Type: text/html\r\n"
-          );
-
-          deferral.Complete();
-
         }
-      };
+      }
 
-      //dont wait to avoid blocking whe messageloop     
-      Task.Run(() => parentForm.Invoke(requestProxyMethod));
+    }
 
+    private async Task<Func<HttpClient>> WaitForHttpClientFactoryAsync() {
+      //the host is started on its own thread - early requests have to wait until it is ready
+      DateTime timeout = DateTime.UtcNow.AddSeconds(30);
+      while (_HttpClientFactory == null) {
+        if (DateTime.UtcNow > timeout) {
+          throw new TimeoutException("The in-memory ASP.NET Core host did not start within 30 seconds.");
+        }
+        await Task.Delay(20);
+      }
+      return _HttpClientFactory;
+    }
+
+    private void TrySetErrorResponse(CoreWebView2 coreWebView, CoreWebView2WebResourceRequestedEventArgs e, Exception ex) {
+      try {
+
+        string errorMessage = $"Internal Server Error";
+
+        //UNSAFE
+        errorMessage = ex.Message;
+
+        string stackTrace = (ex.StackTrace ?? string.Empty);
+        string errorPageHtml = $"<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Error</title><body style=\"margin:0;min-height:100vh;background:#8b0000;font-family:Consolas,Monaco,'Courier New',monospace;color:#220;display:flex;align-items:center;justify-content:flex-start;padding:4rem\"><main style=\"width:min(1100px,calc(100vw - 8rem));background:#fff5f5;border-radius:18px;box-shadow:0 24px 80px #0006;padding:2rem;text-align:left;white-space:pre-wrap;overflow:auto\"><h1 style=\"margin:0 0 1rem;color:#8b0000;font-size:1.6rem\">Error</h1><pre style=\"margin:0;font:inherit;line-height:1.0;font-size:0.8rem\"><b>{ex.GetType().Name}</b>: {ex.Message}<br>\r\n<i>{stackTrace.Replace(" in ", Environment.NewLine + "in ").Replace(Environment.NewLine, "<br>\r\n").TrimStart()}</i></pre></main></body></html>";
+
+        byte[] errorBytes = Encoding.UTF8.GetBytes(errorPageHtml);
+        MemoryStream errorStream = new MemoryStream(errorBytes);
+
+        //reason phrases must not contain line breaks
+        errorMessage = errorMessage.Replace("\r", " ").Replace("\n", " ");
+
+        e.Response = coreWebView.Environment.CreateWebResourceResponse(
+          errorStream,
+          500,
+          errorMessage,
+          "Content-Type: text/html\r\n"
+        );
+
+      }
+      catch (Exception innerEx) {
+        //the WebView (window) is already gone
+        DevLogger.LogTrace($"Error response could not be set: {innerEx.Message}");
+      }
     }
 
     private HttpRequestMessage CreateBufferedRequestMessage(CoreWebView2WebResourceRequest webViewRequest) {
